@@ -1,0 +1,26 @@
+defaults:
+  - _self_
+  - model: distilbert-base-uncased
+  - training: default
+  - override hydra/hydra_logging: disabled  
+  - override hydra/job_logging: disabled 
+
+general:
+  seed: 42
+  data_dir: ../nq-train
+  corpus_path: ${general.data_dir}/wiki_corpus_reduced.jsonl
+  query_path: ${general.data_dir}/queries.jsonl
+  qrels_path: ${general.data_dir}/qrels/train.tsv
+  category_to_label: ${general.data_dir}/category_to_label.json
+  val_split: 0.3
+  output_dir: output
+  model_dir: ${general.output_dir}/saved_models
+  logs_dir: ${general.output_dir}/logs
+
+
+hydra:
+  # output_subdir: ${general.data_dir}/hydra  
+  run:  
+    dir: .
+  job:
+    chdir: True

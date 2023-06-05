@@ -1,0 +1,6 @@
+init:
+  doc_model: 'distilbert-base-uncased'
+  tokenizer: ${model.init.doc_model}
+  device: 'cuda'
+  aggregation_mode: 'mean'
+  
