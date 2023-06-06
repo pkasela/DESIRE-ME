@@ -31,6 +31,14 @@ class BiEncoder(nn.Module):
         encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=512, return_tensors='pt').to(self.device)
         embeddings = self.doc_model(**encoded_input)
         return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
+    
+    def query_encoder_with_context(self, sentences):
+        query_embedding = self.query_encoder(sentences)
+        query_class = self.cls(query_embedding)
+        query_embedding = self.query_embedder(query_embedding, query_class)
+        return query_embedding
+        
+        
 
     def doc_encoder(self, sentences):
         encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=512, return_tensors='pt').to(self.device)
@@ -40,6 +48,7 @@ class BiEncoder(nn.Module):
     def forward(self, triplet_texts):
         query_embedding = self.query_encoder(triplet_texts[0])
         query_class = self.cls(query_embedding)
+        query_embedding = self.query_embedder(query_embedding, query_class)
         
         pos_embedding = self.doc_encoder(triplet_texts[1])
         neg_embedding = self.doc_encoder(triplet_texts[2])
@@ -66,7 +75,7 @@ class BiEncoder(nn.Module):
         
         query_embs = torch.stack(query_embs, dim=1)
         
-        query_class = F.softmax(query_class, dim=1)
+        query_class = softmax(query_class, dim=1)
         query_embs = einsum('bmd,bm->bd', query_embs, query_class)
         
         return F.normalize(query_embs)

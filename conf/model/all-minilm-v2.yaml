@@ -1,0 +1,8 @@
+init:
+  doc_model: 'sentence-transformers/all-MiniLM-L12-v2'
+  tokenizer: ${model.init.doc_model}
+  device: 'cuda'
+  aggregation_mode: 'mean'
+  embedding_size: 384
+  query_specialize: True
+  

@@ -3,4 +3,5 @@ init:
   tokenizer: ${model.init.doc_model}
   device: 'cuda'
   aggregation_mode: 'mean'
-  
+  embedding_size: 768
+  query_specialize: True

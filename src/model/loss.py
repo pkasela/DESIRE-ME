@@ -50,3 +50,16 @@ class TripletMarginClassLoss(nn.Module):
         ce_loss = self.CELoss(anchors_pred, anchors_classes)
         
         return self.alpha * triple_loss + (1 - self.alpha) * ce_loss
+    
+    def val_forward(
+        self,
+        anchors_classes,
+        anchors_pred,
+        anchors,
+        positives,
+        negatives
+    ):
+        triple_loss = self.TripletLoss(anchors, positives, negatives)
+        ce_loss = self.CELoss(anchors_pred, anchors_classes)
+        
+        return triple_loss, ce_loss, self.alpha * triple_loss + (1 - self.alpha) * ce_loss

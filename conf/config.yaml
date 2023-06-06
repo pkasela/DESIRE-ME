@@ -17,6 +17,16 @@ general:
   model_dir: ${general.output_dir}/saved_models
   logs_dir: ${general.output_dir}/logs
 
+test:
+  data_dir: ../nq
+  corpus_path: ${test.data_dir}/corpus.jsonl
+  query_path: ${test.data_dir}/queries.jsonl
+  qrels_path: ${test.data_dir}/qrels.json
+  bm25_run_path: ${test.data_dir}/bm25_run.json
+  category_to_label: ${general.data_dir}/category_to_label.json
+  embedding_dir: ${general.output_dir}/embeddings
+  
+  
 
 hydra:
   # output_subdir: ${general.data_dir}/hydra  
