@@ -9,7 +9,7 @@ from indxr import Indxr
 from omegaconf import DictConfig, OmegaConf
 from transformers import AutoModel, AutoTokenizer
 
-from model.models import BiEncoder
+from model.models import BiEncoder, BiEncoderCLS
 from model.utils import seed_everything
 
 logger = logging.getLogger(__name__)
@@ -17,17 +17,41 @@ logger = logging.getLogger(__name__)
 
 def get_bert_rank(data, model, doc_embedding, bm25_runs, id_to_index, query_specialize):
     bert_run = {}
+    model.eval()
     for d in tqdm.tqdm(data, total=len(data)):
         with torch.no_grad():
             if query_specialize:
-                q_embedding = model.query_encoder_with_context(d['text'])#.cpu()
+                q_embedding = model.query_encoder_with_context([d['text']])
             else:
-                q_embedding = model.query_encoder(d['text'])
+                q_embedding = model.query_encoder([d['text']])
         
         bm25_docs = list(bm25_runs[d['_id']].keys())
         d_embeddings = doc_embedding[torch.tensor([int(id_to_index[x]) for x in bm25_docs])]
         bert_scores = torch.einsum('xy, ly -> x', d_embeddings, q_embedding)
         bert_run[d['_id']] = {doc_id: bert_scores[i].item() for i, doc_id in enumerate(bm25_docs)}
+        
+    return bert_run
+
+
+def get_full_bert_rank(data, model, doc_embedding, id_to_index, query_specialize, k=100):
+    bert_run = {}
+    index_to_id = {ind: _id for _id, ind in id_to_index.items()}
+    model.eval()
+    # bert_bm25_run = {}
+    for d in tqdm.tqdm(data, total=len(data)):
+        with torch.no_grad():
+            if query_specialize:
+                q_embedding = model.query_encoder_with_context([d['text']])
+            else:
+                q_embedding = model.query_encoder([d['text']])
+        
+        bert_scores = torch.einsum('xy, ly -> x', doc_embedding, q_embedding)
+        index_sorted = torch.argsort(bert_scores, descending=True)
+        top_k = index_sorted[:k]
+        bert_ids = [index_to_id[int(_id)] for _id in top_k]
+        bert_scores = bert_scores[top_k]
+        bert_run[d['_id']] = {doc_id: bert_scores[i].item() for i, doc_id in enumerate(bert_ids)}
+        
         
     return bert_run
     
@@ -68,8 +92,8 @@ def main(cfg: DictConfig):
         id_to_index = json.load(f)
     
     data = Indxr(cfg.test.query_path, key_id='_id')
-    bert_run = get_bert_rank(data, model, doc_embedding, bm25_run, id_to_index, cfg.model.init.query_specialize)
-    
+    # bert_run = get_bert_rank(data, model, doc_embedding, bm25_run, id_to_index, cfg.model.init.query_specialize)
+    bert_run = get_full_bert_rank(data, model, doc_embedding, id_to_index, cfg.model.init.query_specialize, 100)
     with open(f'{cfg.test.data_dir}/{cfg.model.init.doc_model.replace("/","_")}.json', 'w') as f:
         json.dump(bert_run, f)
 

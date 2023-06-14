@@ -58,7 +58,7 @@ class LoadTrainNQData(torch.utils.data.Dataset):
             }
         
         return {
-            'query_text': query_text,
+            'question': query_text,
             'pos_text': pos_doc['title'] + '. ' + pos_doc['text'],
             'pos_category': self.cat_to_label[pos_category]
         }
@@ -81,5 +81,5 @@ def in_batch_negative_collate_fn(batch):
         'question': question_texts,
         'pos_text': [x.get('pos_text') for x in batch],
         'pos_category': [x.get('pos_category') for x in batch],
-        'neg_text': neg_texts
+        # 'neg_text': neg_texts
     }

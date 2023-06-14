@@ -1,9 +1,8 @@
 init:
-  doc_model: 'sentence-transformers/all-MiniLM-L6-v2'
+  doc_model: 'bert-base-uncased'
   tokenizer: ${model.init.doc_model}
   device: 'cuda'
   aggregation_mode: 'mean'
-  embedding_size: 384
+  embedding_size: 768
   query_specialize: True
   continue_train: False
-  

@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - model: distilbert-base-uncased
+  - model: bert-base-uncased
   - training: default
   - override hydra/hydra_logging: disabled  
   - override hydra/job_logging: disabled 

@@ -9,7 +9,7 @@ from indxr import Indxr
 from omegaconf import DictConfig
 from transformers import AutoModel, AutoTokenizer
 
-from model.models import BiEncoder
+from model.models import BiEncoder, BiEncoderCLS
 from model.utils import seed_everything
 
 logger = logging.getLogger(__name__)
@@ -36,7 +36,7 @@ def main(cfg: DictConfig):
 
     tokenizer = AutoTokenizer.from_pretrained(cfg.model.init.tokenizer)
     doc_model = AutoModel.from_pretrained(cfg.model.init.doc_model)
-    model = BiEncoder(
+    model = BiEncoderCLS(
         doc_model=doc_model,
         tokenizer=tokenizer,
         num_classes=len(category_to_label),
@@ -57,13 +57,13 @@ def main(cfg: DictConfig):
     with open(cfg.test.bm25_run_path, 'r') as f:
         bm25_run = json.load(f)
     
-    important_docs = []
-    for run in bm25_run:
-        important_docs.extend(list(bm25_run[run]))
-    important_docs = set(important_docs)
+    # important_docs = []
+    # for run in bm25_run:
+    #     important_docs.extend(list(bm25_run[run]))
+    # important_docs = set(important_docs)
     embedding_matrix = torch.zeros(len(corpus), cfg.model.init.embedding_size).float()
     for doc in tqdm.tqdm(corpus):
-        if doc['_id'] in important_docs:
+        if True: #doc['_id'] in important_docs:
             id_to_index[doc['_id']] = index
             index += 1
             texts.append(doc['title'] + '. ' + doc['text'])

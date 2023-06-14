@@ -5,3 +5,4 @@ init:
   aggregation_mode: 'mean'
   embedding_size: 768
   query_specialize: True
+  continue_train: False

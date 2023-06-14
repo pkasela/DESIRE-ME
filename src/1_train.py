@@ -13,8 +13,8 @@ from torch.optim import AdamW
 from transformers import AutoModel, AutoTokenizer
 
 from dataloader.dataloader import LoadTrainNQData, in_batch_negative_collate_fn
-from model.loss import TripletMarginClassLoss
-from model.models import BiEncoder
+from model.loss import TripletMarginClassLoss, MultipleRankingLoss
+from model.models import BiEncoder, BiEncoderCLS
 from model.utils import seed_everything
 
 logger = logging.getLogger(__name__)
@@ -36,9 +36,12 @@ def train(train_data, model, optimizer, loss_fn, batch_size, epoch, device):
         average_loss (float): returns the average training loss value for the current epoch
     """
     losses = []
+    ce_losses = []
+    triple_losses = []
+    
     data = torch.utils.data.DataLoader(
         train_data, 
-        collate_fn=in_batch_negative_collate_fn,
+        # collate_fn=in_batch_negative_collate_fn,
         batch_size=batch_size,
         shuffle=True
     )
@@ -46,21 +49,28 @@ def train(train_data, model, optimizer, loss_fn, batch_size, epoch, device):
     optimizer.zero_grad()
     for _, batch in enumerate(train_data):
         with torch.cuda.amp.autocast():
-            output = model.forward_random_neg((batch['question'], batch['pos_text'], batch['neg_text']))
-            loss_val = loss_fn(
-                torch.tensor(batch['pos_category']).to(device), output[0],
-                output[1], output[2], output[3]
+            output = model.forward_random_neg((batch['question'], batch['pos_text']))
+            triple_loss, ce_loss, loss_val = loss_fn(
+                batch['pos_category'].to(device), output[0],
+                output[1], output[2]
             )
         
+        # loss_val.backward()
         loss_val.backward()
         optimizer.step()
         optimizer.zero_grad()
 
         losses.append(loss_val.cpu().detach().item())
+        ce_losses.append(ce_loss.cpu().detach().item())
+        triple_losses.append(triple_loss.cpu().detach().item())
+        
         average_loss = np.mean(losses)
-        train_data.set_description("TRAIN EPOCH {:3d} Current loss {:.2e}, Average {:.2e}".format(epoch, loss_val, average_loss))
+        average_ce_loss = np.mean(ce_losses)
+        average_triple_loss = np.mean(triple_losses)
+        
+        train_data.set_description("TRAIN EPOCH {:3d} Current loss {:.2e}, Average {:.2e} CE Loss {:.2e}, T Loss {:.2e}".format(epoch, loss_val, average_loss, average_ce_loss, average_triple_loss))
 
-    return average_loss    
+    return average_loss
 
     
 def validate(val_data, model, loss_fn, batch_size, epoch, device):
@@ -83,9 +93,10 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
     ce_losses = []
     triple_losses = []
     accuracy = []
+    sim_accuracy = []
     data = torch.utils.data.DataLoader(
         val_data,
-        collate_fn=in_batch_negative_collate_fn,
+        # collate_fn=in_batch_negative_collate_fn,
         batch_size=batch_size,
         shuffle=True
     )
@@ -93,14 +104,15 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
     for _, batch in enumerate(val_data):
         with torch.no_grad():
             with torch.cuda.amp.autocast():
-                output = model.forward_random_neg((batch['question'], batch['pos_text'], batch['neg_text']))
-                triple_loss, ce_loss, loss_val = loss_fn.val_forward(
-                    torch.tensor(batch['pos_category']).to(device), output[0],
-                    output[1], output[2], output[3]
+                output = model.forward_random_neg((batch['question'], batch['pos_text']))
+                triple_loss, ce_loss, loss_val, sim_correct = loss_fn.val_forward(
+                    batch['pos_category'].to(device), output[0],
+                    output[1], output[2]
                 )
                 predictions = output[0].argmax(dim=1, keepdim=True).squeeze()
-                correct = (predictions == torch.tensor(batch['pos_category']).to(device))
+                correct = (predictions == batch['pos_category'].to(device))
                 accuracy.extend(correct.tolist())
+                sim_accuracy.extend(sim_correct.tolist())
 
         losses.append(loss_val.cpu().detach().item())
         ce_losses.append(ce_loss.cpu().detach().item())
@@ -110,7 +122,8 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
         average_triple_loss = np.mean(triple_losses)
         
         average_accuracy = np.mean(accuracy)
-        val_data.set_description("VAL EPOCH {:3d} Average Accuracy {}, Average Loss {:.2e}, CE Loss {:.2e}, T Loss {:.2e}".format(epoch, round(average_accuracy*100,2), average_loss, average_ce_loss, average_triple_loss))
+        average_sim_accuracy = np.mean(sim_accuracy)
+        val_data.set_description("VAL EPOCH {:3d} Average Accuracy {} Sim Accuracy {}, Average Loss {:.2e}, CE Loss {:.2e}, T Loss {:.2e}".format(epoch, round(average_accuracy*100,2), round(average_sim_accuracy*100,2), average_loss, average_ce_loss, average_triple_loss))
 
     return average_loss    
 
@@ -160,42 +173,49 @@ def main(cfg: DictConfig) -> None:
 
     tokenizer = AutoTokenizer.from_pretrained(cfg.model.init.tokenizer)
     doc_model = AutoModel.from_pretrained(cfg.model.init.doc_model)
-    model = BiEncoder(
+    model = BiEncoderCLS(
         doc_model=doc_model,
         tokenizer=tokenizer,
         num_classes=len(category_to_label),
         device=cfg.model.init.device,
         mode=cfg.model.init.aggregation_mode
     )
-    for params in model.doc_model.parameters():
-        params.require_grad = False
-    loss_fn = TripletMarginClassLoss()
+    
+    loss_fn = MultipleRankingLoss(device=cfg.model.init.device)
 
     batch_size = cfg.training.batch_size
     max_epoch = cfg.training.max_epoch
     optimizer = AdamW(model.parameters(), lr=cfg.training.lr)
-
     
-    # model.load_state_dict(torch.load(f'{cfg.general.model_dir}/{cfg.model.init.doc_model}_best.pt'))
+    
+    if cfg.model.init.continue_train:
+        logging.info('Loading previous best model to continue training')
+        model.load_state_dict(torch.load(f'{cfg.general.model_dir}/{cfg.model.init.doc_model.replace("/","_")}_best.pt'))
+    
+    # model.load_state_dict(torch.load(f'{cfg.general.model_dir}/{cfg.model.init.doc_model.replace("/", "_")}_best.pt'))
     # model.eval()
     # val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
     
     # return
     best_val_loss = 999
     for epoch in tqdm.tqdm(range(max_epoch)):
+        if epoch == int(max_epoch/2):
+            logging.info(f'Reducing the learning rate from {optimizer.param_groups[0]["lr"]} to {optimizer.param_groups[0]["lr"]/10}')
+            optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr']/10
         model.train()
-        average_loss = train(train_data, model, optimizer, loss_fn, batch_size, epoch, cfg.model.init.device)
-        logging.info("TRAIN EPOCH: {:3d}, Average Loss: {:.2e}".format(epoch, average_loss))
+        average_loss = train(train_data, model, optimizer, loss_fn, batch_size, epoch + 1, cfg.model.init.device)
+        logging.info("TRAIN EPOCH: {:3d}, Average Loss: {:.2e}".format(epoch + 1, average_loss))
         
         model.eval()
-        val_loss = validate(val_data, model, loss_fn, batch_size, epoch, cfg.model.init.device)
-        logging.info("VAL EPOCH: {:3d}, Average Loss: {:.2e}".format(epoch, val_loss))
+        val_loss = validate(val_data, model, loss_fn, batch_size, epoch + 1, cfg.model.init.device)
+        logging.info("VAL EPOCH: {:3d}, Average Loss: {:.2e}".format(epoch + 1, val_loss))
         
         if val_loss < best_val_loss:
             logging.info(f'Found new best model on epoch: {epoch + 1}, new best validation loss {val_loss}')
             best_val_loss = val_loss
             logging.info(f'saving model checkpoint at epoch {epoch + 1}')
-            save(model.state_dict(), f'{cfg.general.model_dir}/{cfg.model.init.doc_model}_best.pt')
+            save(model.state_dict(), f'{cfg.general.model_dir}/{cfg.model.init.doc_model.replace("/", "_")}_best.pt')
+            save(model, f'{cfg.general.model_dir}/{cfg.model.init.doc_model.replace("/", "_")}_best.whole')
 
 
 if __name__ == '__main__':
