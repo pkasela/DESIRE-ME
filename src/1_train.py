@@ -190,14 +190,13 @@ def main(cfg: DictConfig) -> None:
     
     if cfg.model.init.continue_train:
         logging.info('Loading previous best model to continue training')
-        model.load_state_dict(torch.load(f'{cfg.general.model_dir}/{cfg.model.init.doc_model.replace("/","_")}_best.pt'))
+        model.load_state_dict(torch.load(f'{cfg.general.model_dir}/{cfg.model.init.save_model}_best.pt'))
+        
+        val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
     
-    # model.load_state_dict(torch.load(f'{cfg.general.model_dir}/{cfg.model.init.doc_model.replace("/", "_")}_best.pt'))
-    # model.eval()
-    # val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
-    
-    # return
-    best_val_loss = 999
+    else:
+        best_val_loss = 999
+
     for epoch in tqdm.tqdm(range(max_epoch)):
         if epoch == int(max_epoch/2):
             logging.info(f'Reducing the learning rate from {optimizer.param_groups[0]["lr"]} to {optimizer.param_groups[0]["lr"]/10}')
@@ -214,8 +213,8 @@ def main(cfg: DictConfig) -> None:
             logging.info(f'Found new best model on epoch: {epoch + 1}, new best validation loss {val_loss}')
             best_val_loss = val_loss
             logging.info(f'saving model checkpoint at epoch {epoch + 1}')
-            save(model.state_dict(), f'{cfg.general.model_dir}/{cfg.model.init.doc_model.replace("/", "_")}_best.pt')
-            save(model, f'{cfg.general.model_dir}/{cfg.model.init.doc_model.replace("/", "_")}_best.whole')
+            save(model.state_dict(), f'{cfg.general.model_dir}/{cfg.model.init.save_model}.pt')
+            save(model, f'{cfg.general.model_dir}/{cfg.model.init.save_model}.whole')
 
 
 if __name__ == '__main__':
