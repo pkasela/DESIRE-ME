@@ -48,8 +48,8 @@ def main(cfg: DictConfig):
             device=cfg.model.init.device,
             mode=cfg.model.init.aggregation_mode
         )
-        torch.save(model.state_dict(), f'{cfg.general.model_dir}/{cfg.model.init.save_model}_best.pt')
-        torch.save(model, f'{cfg.general.model_dir}/{cfg.model.init.save_model}_best.whole')
+        torch.save(model.state_dict(), f'{cfg.general.model_dir}/{cfg.model.init.save_model}.pt')
+        torch.save(model, f'{cfg.general.model_dir}/{cfg.model.init.save_model}.whole')
 
     
     index = 0
