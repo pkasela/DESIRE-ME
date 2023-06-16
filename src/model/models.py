@@ -143,35 +143,21 @@ class BiEncoderCLS(nn.Module):
         self.pooling = self.mean_pooling if mode == 'mean' else self.max_pooling
         
         self.num_classes = num_classes
-        # self.cls = nn.Linear(self.hidden_size, self.num_classes).to(device)
-        self.cls_1 = nn.Linear(self.hidden_size, self.hidden_size*2).to(device)
-        self.cls_2 = nn.Linear(self.hidden_size*2, self.hidden_size*4).to(device)
-        self.cls_3 = nn.Linear(self.hidden_size*4, self.num_classes).to(device)
+        self.init_cls()
         
-        self.query_specializer_1 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_2 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_3 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_4 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_5 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_6 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_7 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_8 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_9 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_10 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_11 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_12 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_13 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_14 = QuerySpecializer(self.hidden_size, self.device)
-        self.query_specializer_15 = QuerySpecializer(self.hidden_size, self.device)
-        
-        # for i in range(num_classes):
-        #     self.query_embedding_changer.append(nn.Linear(self.hidden_size, self.hidden_size).to(device))
-            
+        self.query_specializer = nn.ModuleList([QuerySpecializer(self.hidden_size, self.device) for _ in range(self.num_classes)])    
         
     def query_encoder(self, sentences):
         encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=128, return_tensors='pt').to(self.device)
         embeddings = self.doc_model(**encoded_input)
         return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
+    
+    
+    def init_cls(self):
+        self.cls_1 = nn.Linear(self.hidden_size, self.hidden_size*2).to(self.device)
+        self.cls_2 = nn.Linear(self.hidden_size*2, self.hidden_size*4).to(self.device)
+        self.cls_3 = nn.Linear(self.hidden_size*4, self.num_classes).to(self.device)
+        
     
     def query_encoder_with_context(self, sentences):
         query_embedding = self.query_encoder(sentences)
@@ -215,42 +201,9 @@ class BiEncoderCLS(nn.Module):
         return query_class, query_embedding, pos_embedding
         
     def query_embedder(self, query_embedding, query_class):
-        # query_embs = [self.query_embedding_changer[i](query_embedding) for i in range(self.num_classes)]
-        query_embs_1 = self.query_specializer_1(query_embedding)
-        query_embs_2 = self.query_specializer_2(query_embedding)
-        query_embs_3 = self.query_specializer_3(query_embedding)
-        query_embs_4 = self.query_specializer_4(query_embedding)
-        query_embs_5 = self.query_specializer_5(query_embedding)
-        query_embs_6 = self.query_specializer_6(query_embedding)
-        query_embs_7 = self.query_specializer_7(query_embedding)
-        query_embs_8 = self.query_specializer_8(query_embedding)
-        query_embs_9 = self.query_specializer_9(query_embedding)
-        query_embs_10 = self.query_specializer_10(query_embedding)
-        query_embs_11 = self.query_specializer_11(query_embedding)
-        query_embs_12 = self.query_specializer_12(query_embedding)
-        query_embs_13 = self.query_specializer_13(query_embedding)
-        query_embs_14 = self.query_specializer_14(query_embedding)
-        query_embs_15 = self.query_specializer_15(query_embedding)
+        query_embs = [self.query_specializer[i](query_embedding) for i in range(self.num_classes)]
         
-        query_embs = torch.stack(
-            [
-                query_embs_1,
-                query_embs_2,
-                query_embs_3,
-                query_embs_4,
-                query_embs_5,
-                query_embs_6,
-                query_embs_7,
-                query_embs_8,
-                query_embs_9,
-                query_embs_10,
-                query_embs_11,
-                query_embs_12,
-                query_embs_13,
-                query_embs_14,
-                query_embs_15, 
-            ],
-            dim=1)
+        query_embs = torch.stack(query_embs, dim=1)
         
         query_class = softmax(query_class, dim=1)
         

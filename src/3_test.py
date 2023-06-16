@@ -74,7 +74,7 @@ def main(cfg: DictConfig):
         category_to_label = json.load(f)
 
     logging.info(f'Loading model from {cfg.model.init.save_model}_best.pt')
-    model= torch.load(f'{cfg.general.model_dir}/{cfg.model.init.save_model}_best.whole')
+    model= torch.load(f'{cfg.general.model_dir}/{cfg.model.init.save_model}.whole')
     
     with open(cfg.testing.bm25_run_path, 'r') as f:
         bm25_run = json.load(f)
