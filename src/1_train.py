@@ -198,9 +198,9 @@ def main(cfg: DictConfig) -> None:
         best_val_loss = 999
 
     for epoch in tqdm.tqdm(range(max_epoch)):
-        # if epoch == int(max_epoch/2):
-        #     logging.info(f'Reducing the learning rate from {optimizer.param_groups[0]["lr"]} to {optimizer.param_groups[0]["lr"]/10}')
-        #     optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr']/10
+        if epoch == int(max_epoch/2):
+            logging.info(f'Reducing the learning rate from {optimizer.param_groups[0]["lr"]} to {optimizer.param_groups[0]["lr"]/10}')
+            optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr']/10
         model.train()
         average_loss = train(train_data, model, optimizer, loss_fn, batch_size, epoch + 1, cfg.model.init.device)
         logging.info("TRAIN EPOCH: {:3d}, Average Loss: {:.2e}".format(epoch + 1, average_loss))
