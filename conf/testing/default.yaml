@@ -1,8 +1,0 @@
-data_dir: ../nq
-corpus_path: ${testing.data_dir}/corpus.jsonl
-query_path: ${testing.data_dir}/queries.jsonl
-qrels_path: ${testing.data_dir}/qrels.json
-bm25_run_path: ${testing.data_dir}/bm25_run.json
-category_to_label: ${general.data_dir}/category_to_label.json
-embedding_dir: ${general.output_dir}/embeddings
-rerank: True

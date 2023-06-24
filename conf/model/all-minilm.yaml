@@ -4,7 +4,7 @@ init:
   device: 'cuda'
   aggregation_mode: 'mean'
   embedding_size: 384
-  save_model: 'sentence-transformers_all-MiniLM-L6-v2_best'
+  save_model: 'sentence-transformers_all-MiniLM-L6-v2'
   query_specialize: True
   continue_train: False
   
