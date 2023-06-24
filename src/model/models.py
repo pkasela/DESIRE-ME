@@ -131,6 +131,27 @@ class QuerySpecializer(nn.Module):
         
         return query_embs
 
+class QuerySpecializerBiLinear(nn.Module):
+    def __init__(self, hidden_size, device):
+        super(QuerySpecializerBiLinear, self).__init__()
+        
+        self.hidden_size = hidden_size
+        self.device = device
+        # self.query_embedding_changer_1 = nn.Bilinear(self.hidden_size, self.hidden_size, self.hidden_size*2).to(device)
+        
+        # self.query_embedding_changer_2 = nn.Bilinear(self.hidden_size*2, self.hidden_size*2, self.hidden_size*4).to(device)
+        # self.query_embedding_changer_3 = nn.Bilinear(self.hidden_size*4, self.hidden_size*4, self.hidden_size*2).to(device)
+        self.query_embedding_changer_4 = nn.Bilinear(self.hidden_size, self.hidden_size, self.hidden_size).to(device)
+        
+    def forward(self, query_embs):
+        # query_embs = F.relu(self.query_embedding_changer_1(query_embs, query_embs))
+        # query_embs = F.relu(self.query_embedding_changer_2(query_embs, query_embs))
+        # query_embs = F.relu(self.query_embedding_changer_3(query_embs, query_embs))
+        query_embs = self.query_embedding_changer_4(query_embs, query_embs)
+        
+        return query_embs
+
+
 class BiEncoderCLS(nn.Module):
     def __init__(self, doc_model, tokenizer, num_classes, device, mode='mean'):
         super(BiEncoderCLS, self).__init__()

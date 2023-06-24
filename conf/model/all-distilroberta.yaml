@@ -4,6 +4,6 @@ init:
   device: 'cuda'
   aggregation_mode: 'mean'
   embedding_size: 768
-  save_model: 'sentence-transformers_all-distilroberta-v1'
+  save_model: 'sentence-transformers_all-distilroberta-v1_37'
   query_specialize: True
   continue_train: False

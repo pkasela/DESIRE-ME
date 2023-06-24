@@ -1,0 +1,7 @@
+data_dir: ../hotpotqa
+corpus_path: ${testing.data_dir}/corpus.jsonl
+query_path: ${testing.data_dir}/queries.jsonl
+qrels_path: ${testing.data_dir}/qrels.json
+bm25_run_path: ${testing.data_dir}/bm25_run.json
+embedding_dir: ${general.output_dir}/hotpotqa_embeddings
+rerank: False
