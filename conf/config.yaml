@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - model: bert-base-uncased
+  - model: all-minilm
   - training: ${model}
   - testing: nq
   - dataset: nq-train

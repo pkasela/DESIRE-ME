@@ -48,12 +48,28 @@ test_queries_df = queries_df[queries_df['id'].isin(qrel_df['query-id'])]
 test_queries_df.to_csv(f'{data_folder}/queries.tsv', sep='\t', header=False, index=None) 
 
 if data_folder == 'hotpotqa':
-    test_ids = set(qrel_df['query-id'])
-    test_queries = [q for q in queries if q['id'] in test_ids]
+    train_qrels = pd.read_csv(f'{data_folder}/qrels/train.tsv', sep='\t')
+    dev_qrels = pd.read_csv(f'{data_folder}/qrels/dev.tsv', sep='\t')
+    test_qrels = pd.read_csv(f'{data_folder}/qrels/test.tsv', sep='\t')
     
-    with open(filename_queries, 'w') as f:
+    train_q_ids = set(train_qrels['query-id']).union(set(dev_qrels['query-id']))
+    test_q_ids = set(test_qrels['query-id'])
+    
+    train_queries = [q for q in queries if q['_id'] in train_q_ids]
+    test_queries = [q for q in queries if q['_id'] in test_q_ids]
+
+    with open(filename_queries.replace('queries.jsonl', 'test_queries.jsonl'), 'w') as f:
         for q in test_queries:
-            q['_id'] = q['id']
-            _ = q.pop('id')
+            # q['_id'] = q['id']
+            # _ = q.pop('id')
             json.dump(q, f)
             f.write('\n')
+                                       
+    with open(filename_queries.replace('queries.jsonl', 'train_queries.jsonl'), 'w') as f:
+        for q in train_queries:
+            # q['_id'] = q['id']
+            # _ = q.pop('id')
+            json.dump(q, f)
+            f.write('\n')
+            
+    pd.concat((train_qrels, dev_qrels)).to_csv(f'{data_folder}/qrels/train_dev.tsv', sep='\t', index=None)

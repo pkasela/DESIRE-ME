@@ -1,10 +1,10 @@
 data_dir: ../nq-train
-corpus_path: ${general.data_dir}/wiki_corpus.jsonl
-query_path: ${general.data_dir}/queries.jsonl
-qrels_path: ${general.data_dir}/qrels/test.tsv
-category_to_label: ${general.data_dir}/category_to_label.json
+corpus_path: ${dataset.data_dir}/wiki_corpus.jsonl
+query_path: ${dataset.data_dir}/queries.jsonl
+qrels_path: ${dataset.data_dir}/qrels/test.tsv
+category_to_label: ${dataset.data_dir}/category_to_label.json
 val_split: 0.3
-output_dir: output
-model_dir: ${general.output_dir}/saved_models
-logs_dir: ${general.output_dir}/logs
+output_dir: output/nq
+model_dir: ${dataset.output_dir}/saved_models
+logs_dir: ${dataset.output_dir}/logs
   
