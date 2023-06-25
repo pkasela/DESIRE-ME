@@ -130,12 +130,12 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: DictConfig) -> None:
-    os.makedirs(cfg.general.output_dir, exist_ok=True)
-    os.makedirs(cfg.general.logs_dir, exist_ok=True)
-    os.makedirs(cfg.general.model_dir, exist_ok=True)
+    os.makedirs(cfg.dataset.output_dir, exist_ok=True)
+    os.makedirs(cfg.dataset.logs_dir, exist_ok=True)
+    os.makedirs(cfg.dataset.model_dir, exist_ok=True)
     
     logging_file = "training.log"
-    logging.basicConfig(filename=os.path.join(cfg.general.logs_dir, logging_file),
+    logging.basicConfig(filename=os.path.join(cfg.dataset.logs_dir, logging_file),
                         filemode='a',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S',
@@ -144,23 +144,23 @@ def main(cfg: DictConfig) -> None:
 
     seed_everything(cfg.general.seed)
 
-    with open(cfg.general.category_to_label, 'r') as f:
+    with open(cfg.dataset.category_to_label, 'r') as f:
         category_to_label = json.load(f)
 
-    qrel_df = pd.read_csv(cfg.general.qrels_path, sep='\t')
+    qrel_df = pd.read_csv(cfg.dataset.qrels_path, sep='\t')
     qrels = {}
 
     for _, row in qrel_df.iterrows():
         qrels[row['query-id']] = {row['corpus-id']: row['score']}
 
     data = LoadTrainNQData(
-        cfg.general.query_path, 
-        cfg.general.corpus_path, 
+        cfg.dataset.query_path, 
+        cfg.dataset.corpus_path, 
         qrels, 
         category_to_label
     )
 
-    val_split = cfg.general.val_split
+    val_split = cfg.dataset.val_split
     if val_split < 1:
         train_split = 1 - val_split
     else:
@@ -190,7 +190,7 @@ def main(cfg: DictConfig) -> None:
     
     if cfg.model.init.continue_train:
         logging.info('Loading previous best model to continue training')
-        model.load_state_dict(torch.load(f'{cfg.general.model_dir}/{cfg.model.init.save_model}_best.pt'))
+        model.load_state_dict(torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}_best.pt'))
         
         val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
     
@@ -213,8 +213,8 @@ def main(cfg: DictConfig) -> None:
             logging.info(f'Found new best model on epoch: {epoch + 1}, new best validation loss {val_loss}')
             best_val_loss = val_loss
             logging.info(f'saving model checkpoint at epoch {epoch + 1}')
-            save(model.state_dict(), f'{cfg.general.model_dir}/{cfg.model.init.save_model}.pt')
-            save(model, f'{cfg.general.model_dir}/{cfg.model.init.save_model}.whole')
+            save(model.state_dict(), f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt')
+            save(model, f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
 
 
 if __name__ == '__main__':

@@ -61,7 +61,7 @@ def get_full_bert_rank(data, model, doc_embedding, id_to_index, query_specialize
 def main(cfg: DictConfig):
     logging_file = "testing.log"
     logging.basicConfig(
-        filename=os.path.join(cfg.general.logs_dir, logging_file),
+        filename=os.path.join(cfg.dataset.logs_dir, logging_file),
         filemode='a',
         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
@@ -70,11 +70,11 @@ def main(cfg: DictConfig):
 
     seed_everything(cfg.general.seed)
 
-    with open(cfg.general.category_to_label, 'r') as f:
+    with open(cfg.dataset.category_to_label, 'r') as f:
         category_to_label = json.load(f)
 
     logging.info(f'Loading model from {cfg.model.init.save_model}.pt')
-    model= torch.load(f'{cfg.general.model_dir}/{cfg.model.init.save_model}.whole')
+    model= torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
     
     with open(cfg.testing.bm25_run_path, 'r') as f:
         bm25_run = json.load(f)
