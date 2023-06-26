@@ -84,6 +84,9 @@ def main(cfg: DictConfig):
     else:
         prefix = 'fullrank'
         
+    import ipdb
+    ipdb.set_trace()
+        
     doc_embedding = torch.load(f'{cfg.testing.embedding_dir}/{cfg.model.init.save_model}_{prefix}.pt').to(cfg.model.init.device)
     
     with open(f'{cfg.testing.embedding_dir}/id_to_index_{cfg.model.init.save_model}_{prefix}.json', 'r') as f:
