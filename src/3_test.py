@@ -23,9 +23,9 @@ def get_bert_rerank(data, model, doc_embedding, bm25_runs, id_to_index, query_sp
     for d in tqdm.tqdm(data, total=len(data)):
         with torch.no_grad():
             if query_specialize:
-                q_embedding = model.query_encoder_with_context([d['text']])
+                q_embedding = model.query_encoder_with_context([d['text']]).half()
             else:
-                q_embedding = model.query_encoder([d['text']])
+                q_embedding = model.query_encoder([d['text']]).half()
         
         bm25_docs = list(bm25_runs[d['_id']].keys())
         d_embeddings = doc_embedding[torch.tensor([int(id_to_index[x]) for x in bm25_docs])]
@@ -43,9 +43,9 @@ def get_full_bert_rank(data, model, doc_embedding, id_to_index, query_specialize
     for d in tqdm.tqdm(data, total=len(data)):
         with torch.no_grad():
             if query_specialize:
-                q_embedding = model.query_encoder_with_context([d['text']])
+                q_embedding = model.query_encoder_with_context([d['text']]).half()
             else:
-                q_embedding = model.query_encoder([d['text']])
+                q_embedding = model.query_encoder([d['text']]).half()
         
         bert_scores = torch.einsum('xy, ly -> x', doc_embedding, q_embedding)
         index_sorted = torch.argsort(bert_scores, descending=True)
@@ -84,10 +84,8 @@ def main(cfg: DictConfig):
     else:
         prefix = 'fullrank'
         
-    import ipdb
-    ipdb.set_trace()
         
-    doc_embedding = torch.load(f'{cfg.testing.embedding_dir}/{cfg.model.init.save_model}_{prefix}.pt').to(cfg.model.init.device)
+    doc_embedding = torch.load(f'{cfg.testing.embedding_dir}/{cfg.model.init.save_model}_{prefix}.pt').half().to(cfg.model.init.device)
     
     with open(f'{cfg.testing.embedding_dir}/id_to_index_{cfg.model.init.save_model}_{prefix}.json', 'r') as f:
         id_to_index = json.load(f)
@@ -108,9 +106,15 @@ def main(cfg: DictConfig):
         
         
     ranx_qrels = Qrels.from_file(cfg.testing.qrels_path)
-    ranx_run = Run(bert_run)
     
-    evaluation_report = compare(ranx_qrels, [ranx_run], ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10'])
+    if cfg.testing.rerank:
+        ranx_run = Run(bert_run, 'ReRanker')
+        ranx_bm25_run = Run(bm25_run, name='BM25')
+        models = [ranx_bm25_run, ranx_run]
+    else:
+        ranx_run = Run(bert_run, 'FullRun')
+        models = [ranx_run]
+    evaluation_report = compare(ranx_qrels, models, ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10'])
     print(evaluation_report)
     logging.info(f"Results for {cfg.model.init.save_model}_{prefix}.json:\n{evaluation_report}")
 

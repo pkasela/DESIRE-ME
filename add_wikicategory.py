@@ -69,8 +69,8 @@ def write_jsonl(file_name, data_jsonl):
                 
 if __name__ == "__main__":
     wiki_folder = "wikipedia_data"
-    corpus_file = 'hotpotqa/corpus.jsonl'
-    out_corpus = 'hotpotqa/wiki_corpus.jsonl'
+    corpus_file = 'fever/corpus.jsonl'
+    out_corpus = 'fever/wiki_corpus.jsonl'
 
     category_df = pd.read_csv(f'{wiki_folder}/category_pandas.csv')
     categorylinks_df = pd.read_csv(f'{wiki_folder}/categorylink_pandas.csv', sep='\t')

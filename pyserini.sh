@@ -2,8 +2,8 @@ python create_pyserini_data.py
 
 python -m pyserini.index.lucene \
   --collection JsonCollection \
-  --input hotpotqa_serini_jsonl \
-  --index indexes/hotpotqa_serini_index \
+  --input fever_serini_jsonl \
+  --index indexes/fever_serini_index \
   --generator DefaultLuceneDocumentGenerator \
   --threads 8 \
   --fields title \
@@ -11,9 +11,9 @@ python -m pyserini.index.lucene \
 
 
 python -m pyserini.search.lucene \
-  --index indexes/hotpotqa_serini_index \
-  --topics hotpotqa/queries.tsv \
-  --output hotpotqa/run.txt \
+  --index indexes/fever_serini_index \
+  --topics fever/queries.tsv \
+  --output fever/run.txt \
   --bm25 \
   --k1 0.9 \
   --b 0.4 \

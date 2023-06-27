@@ -12,9 +12,9 @@ from torch import save
 from torch.optim import AdamW
 from transformers import AutoModel, AutoTokenizer
 
-from dataloader.dataloader import LoadTrainNQData, in_batch_negative_collate_fn
-from model.loss import TripletMarginClassLoss, MultipleRankingLoss
-from model.models import BiEncoder, BiEncoderCLS
+from dataloader.dataloader import LoadTrainNQData
+from model.loss import MultipleRankingLoss
+from model.models import BiEncoderCLS
 from model.utils import seed_everything
 
 logger = logging.getLogger(__name__)
@@ -151,7 +151,7 @@ def main(cfg: DictConfig) -> None:
     qrels = {}
 
     for _, row in qrel_df.iterrows():
-        qrels[row['query-id']] = {row['corpus-id']: row['score']}
+        qrels[str(row['query-id'])] = {str(row['corpus-id']): row['score']}
 
     data = LoadTrainNQData(
         cfg.dataset.query_path, 
@@ -198,22 +198,21 @@ def main(cfg: DictConfig) -> None:
         best_val_loss = 999
 
     for epoch in tqdm.tqdm(range(max_epoch)):
-        if epoch == int(max_epoch/2):
-            logging.info(f'Reducing the learning rate from {optimizer.param_groups[0]["lr"]} to {optimizer.param_groups[0]["lr"]/10}')
-            optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr']/10
+        # if epoch == int(max_epoch/2):
+        #     logging.info(f'Reducing the learning rate from {optimizer.param_groups[0]["lr"]} to {optimizer.param_groups[0]["lr"]/10}')
+        #     optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr']/10
         model.train()
         average_loss = train(train_data, model, optimizer, loss_fn, batch_size, epoch + 1, cfg.model.init.device)
-        logging.info("TRAIN EPOCH: {:3d}, Average Loss: {:.2e}".format(epoch + 1, average_loss))
+        logging.info("TRAIN EPOCH: {:3d}, Average Loss: {:.5e}".format(epoch + 1, average_loss))
         
         model.eval()
         val_loss = validate(val_data, model, loss_fn, batch_size, epoch + 1, cfg.model.init.device)
-        logging.info("VAL EPOCH: {:3d}, Average Loss: {:.2e}".format(epoch + 1, val_loss))
+        logging.info("VAL EPOCH: {:3d}, Average Loss: {:.5e}".format(epoch + 1, val_loss))
         
         if val_loss < best_val_loss:
             logging.info(f'Found new best model on epoch: {epoch + 1}, new best validation loss {val_loss}')
             best_val_loss = val_loss
             logging.info(f'saving model checkpoint at epoch {epoch + 1}')
-            save(model.state_dict(), f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt')
             save(model, f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
 
 
