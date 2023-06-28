@@ -190,7 +190,7 @@ def main(cfg: DictConfig) -> None:
     
     if cfg.model.init.continue_train:
         logging.info('Loading previous best model to continue training')
-        model.load_state_dict(torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}_best.pt'))
+        model = torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
         
         val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
     
