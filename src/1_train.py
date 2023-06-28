@@ -193,7 +193,7 @@ def main(cfg: DictConfig) -> None:
         model = torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
         
         val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
-        logging.info("VAL EPOCH: {:3d}, Average Loss: {:.5e}".format('prev best', val_loss))
+        logging.info("VAL EPOCH: {}, Average Loss: {:.5e}".format('prev best', val_loss))
         
     
     else:
