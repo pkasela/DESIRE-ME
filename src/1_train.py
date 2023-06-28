@@ -192,8 +192,8 @@ def main(cfg: DictConfig) -> None:
         logging.info('Loading previous best model to continue training')
         model = torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
         
-        val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
-        logging.info("VAL EPOCH: {}, Average Loss: {:.5e}".format('prev best', val_loss))
+        best_val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
+        logging.info("VAL EPOCH: {}, Average Loss: {:.5e}".format('prev best', best_val_loss))
         
     
     else:
