@@ -227,8 +227,8 @@ class BiEncoderCLS(nn.Module):
         query_embs = torch.stack(query_embs, dim=1)
         
         query_class = softmax(query_class, dim=1)
-        
-        query_embs = einsum('bmd,bm->bd', query_embs, query_class)
+
+        query_embs = einsum('bmd,bm->bd', query_embs, query_class) + query_embedding
                 
         
         return F.normalize(query_embs, dim=-1)
