@@ -109,9 +109,10 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
                     batch['pos_category'].to(device), output[0],
                     output[1], output[2]
                 )
-                predictions = output[0].argmax(dim=1, keepdim=True).squeeze()
-                correct = (predictions == batch['pos_category'].to(device))
-                accuracy.extend(correct.tolist())
+                                
+                predictions = torch.sigmoid(output[0]) > .5
+                correct = (predictions) == batch['pos_category'].to(device)
+                accuracy.extend([l for c in correct.tolist() for l in c])
                 sim_accuracy.extend(sim_correct.tolist())
 
         losses.append(loss_val.cpu().detach().item())
@@ -125,7 +126,7 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
         average_sim_accuracy = np.mean(sim_accuracy)
         val_data.set_description("VAL EPOCH {:3d} Average Accuracy {} Sim Accuracy {}, Average Loss {:.2e}, CE Loss {:.2e}, T Loss {:.2e}".format(epoch, round(average_accuracy*100,2), round(average_sim_accuracy*100,2), average_loss, average_ce_loss, average_triple_loss))
 
-    return average_loss    
+    return average_loss
 
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)

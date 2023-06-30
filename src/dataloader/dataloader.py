@@ -1,7 +1,6 @@
 import torch
 from indxr import Indxr
 import random
-import json
 
 
 class LoadTrainNQData(torch.utils.data.Dataset):
@@ -31,15 +30,16 @@ class LoadTrainNQData(torch.utils.data.Dataset):
         pos_ids = set(self.qrels[query['_id']])
         pos_id = str(random.choice(list(pos_ids)))
         pos_doc = self.corpus.get(pos_id)
-        if pos_doc.get('category', []):
-            pos_category = random.choice(pos_doc.get('category', []))
-        else:
-            pos_category = random.choice(list(self.cat_to_label))
         
+        pos_category = pos_doc.get('category', [])# random.choice(pos_doc.get('category', []))
+        category_tensor = torch.zeros(len(self.cat_to_label))
+        
+        for cat in pos_category:
+            category_tensor[self.cat_to_label[cat]] = 1
         return {
             'question': query_text,
             'pos_text': pos_doc['title'] + '. ' + pos_doc['text'],
-            'pos_category': self.cat_to_label[pos_category]
+            'pos_category': category_tensor #self.cat_to_label[pos_category]
         }
         
     def __len__(self):
