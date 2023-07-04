@@ -1,7 +1,7 @@
 data_dir: ../fever
 corpus_path: ${dataset.data_dir}/wiki_corpus.jsonl
 query_path: ${dataset.data_dir}/train_queries.jsonl
-qrels_path: ${dataset.data_dir}/qrels/train_dev.tsv
+qrels_path: ${dataset.data_dir}/qrels/train.tsv
 category_to_label: ${dataset.data_dir}/category_to_label.json
 val_split: 0.3
 output_dir: output/fever

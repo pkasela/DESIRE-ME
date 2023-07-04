@@ -1,9 +1,10 @@
+DATA_FOLDER='hotpotqa'
 python create_pyserini_data.py
 
 python -m pyserini.index.lucene \
   --collection JsonCollection \
-  --input fever_serini_jsonl \
-  --index indexes/fever_serini_index \
+  --input "$DATA_FOLDER"_serini_jsonl \
+  --index indexes/"$DATA_FOLDER"_serini_index \
   --generator DefaultLuceneDocumentGenerator \
   --threads 8 \
   --fields title \
@@ -11,14 +12,26 @@ python -m pyserini.index.lucene \
 
 
 python -m pyserini.search.lucene \
-  --index indexes/fever_serini_index \
-  --topics fever/queries.tsv \
-  --output fever/run.txt \
+  --index indexes/"$DATA_FOLDER"_serini_index \
+  --topics $DATA_FOLDER/queries.tsv \
+  --output $DATA_FOLDER/run.txt \
   --bm25 \
   --k1 0.9 \
   --b 0.4 \
   --fields contents=1 title=1 \
   --hits 100 \
   --batch 100
+
+python -m pyserini.search.lucene \
+  --index indexes/"$DATA_FOLDER"_serini_index \
+  --topics $DATA_FOLDER/dev_queries.tsv \
+  --output $DATA_FOLDER/dev_run.txt \
+  --bm25 \
+  --k1 0.9 \
+  --b 0.4 \
+  --fields contents=1 title=1 \
+  --hits 100 \
+  --batch 100
+
 
 python serini_run_to_json.py

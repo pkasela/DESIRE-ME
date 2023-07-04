@@ -23,9 +23,9 @@ def get_bert_rerank(data, model, doc_embedding, bm25_runs, id_to_index, query_sp
     for d in tqdm.tqdm(data, total=len(data)):
         with torch.no_grad():
             if query_specialize:
-                q_embedding = model.query_encoder_with_context([d['text']]).half()
+                q_embedding = model.query_encoder_with_context([d['text']])
             else:
-                q_embedding = model.query_encoder([d['text']]).half()
+                q_embedding = model.query_encoder([d['text']])
         
         bm25_docs = list(bm25_runs[d['_id']].keys())
         d_embeddings = doc_embedding[torch.tensor([int(id_to_index[x]) for x in bm25_docs])]
@@ -43,9 +43,9 @@ def get_full_bert_rank(data, model, doc_embedding, id_to_index, query_specialize
     for d in tqdm.tqdm(data, total=len(data)):
         with torch.no_grad():
             if query_specialize:
-                q_embedding = model.query_encoder_with_context([d['text']]).half()
+                q_embedding = model.query_encoder_with_context([d['text']])
             else:
-                q_embedding = model.query_encoder([d['text']]).half()
+                q_embedding = model.query_encoder([d['text']])
         
         bert_scores = torch.einsum('xy, ly -> x', doc_embedding, q_embedding)
         index_sorted = torch.argsort(bert_scores, descending=True)
@@ -85,7 +85,7 @@ def main(cfg: DictConfig):
         prefix = 'fullrank'
         
         
-    doc_embedding = torch.load(f'{cfg.testing.embedding_dir}/{cfg.model.init.save_model}_{prefix}.pt').half().to(cfg.model.init.device)
+    doc_embedding = torch.load(f'{cfg.testing.embedding_dir}/{cfg.model.init.save_model}_{prefix}.pt').to(cfg.model.init.device)
     
     with open(f'{cfg.testing.embedding_dir}/id_to_index_{cfg.model.init.save_model}_{prefix}.json', 'r') as f:
         id_to_index = json.load(f)

@@ -9,7 +9,7 @@ from indxr import Indxr
 from omegaconf import DictConfig
 from transformers import AutoModel, AutoTokenizer
 
-from model.models import BiEncoder, BiEncoderCLS
+from model.models import BiEncoderCLS
 from model.utils import seed_everything
 
 logger = logging.getLogger(__name__)
