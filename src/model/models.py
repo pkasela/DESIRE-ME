@@ -111,7 +111,7 @@ class BiEncoderCLS(nn.Module):
         query_embs = torch.stack(query_embs, dim=1)
         
         query_class = sigmoid(query_class.detach())
-        query_class[query_class < .5] = 0
+        # query_class[query_class < .5] = 0
 
         query_embs = F.normalize(einsum('bmd,bm->bd', query_embs, query_class), dim=-1) + query_embedding
                 
