@@ -24,7 +24,7 @@ def iter_queries_file(filename_queries):
             yield doc
             
 
-data_folder = 'hotpotqa'
+data_folder = 'fever'
 
 filename_corpus = f'{data_folder}/corpus.jsonl'
 docs = [x for x in iter_corpus_file(filename_corpus)]

@@ -1,4 +1,4 @@
-DATA_FOLDER='hotpotqa'
+DATA_FOLDER='fever'
 python create_pyserini_data.py
 
 python -m pyserini.index.lucene \

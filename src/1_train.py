@@ -186,7 +186,6 @@ def main(cfg: DictConfig) -> None:
 
     batch_size = cfg.training.batch_size
     max_epoch = cfg.training.max_epoch
-    optimizer = AdamW(model.parameters(), lr=cfg.training.lr)
     
     
     if cfg.model.init.continue_train:
@@ -199,7 +198,9 @@ def main(cfg: DictConfig) -> None:
     
     else:
         best_val_loss = 999
-
+    
+    optimizer = AdamW(model.parameters(), lr=cfg.training.lr)
+    
     for epoch in tqdm.tqdm(range(max_epoch)):
         # if epoch == int(max_epoch/2):
         #     logging.info(f'Reducing the learning rate from {optimizer.param_groups[0]["lr"]} to {optimizer.param_groups[0]["lr"]/10}')
