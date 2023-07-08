@@ -93,6 +93,8 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
     ce_losses = []
     triple_losses = []
     accuracy = []
+    recalls = []
+    precisions = []
     sim_accuracy = []
     data = torch.utils.data.DataLoader(
         val_data,
@@ -109,9 +111,12 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
                     batch['pos_category'].to(device), output[0],
                     output[1], output[2]
                 )
-                                
                 predictions = torch.sigmoid(output[0]) > .5
                 correct = (predictions) == batch['pos_category'].to(device)
+                recall = (correct * batch['pos_category'].to(device)).sum() / batch['pos_category'].to(device).sum()
+                recalls.append(recall.detach().cpu().item())
+                precision = (correct * predictions).sum() / predictions.sum()
+                precisions.append(precision.detach().cpu().item())
                 accuracy.extend([l for c in correct.tolist() for l in c])
                 sim_accuracy.extend(sim_correct.tolist())
 
@@ -122,9 +127,11 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
         average_ce_loss = np.mean(ce_losses)
         average_triple_loss = np.mean(triple_losses)
         
-        average_accuracy = np.mean(accuracy)
+        # average_accuracy = np.mean(accuracy)
+        average_precision = np.mean(precisions)
+        average_recall = np.mean(recalls)
         average_sim_accuracy = np.mean(sim_accuracy)
-        val_data.set_description("VAL EPOCH {:3d} Average Accuracy {} Sim Accuracy {}, Average Loss {:.2e}, CE Loss {:.2e}, T Loss {:.2e}".format(epoch, round(average_accuracy*100,2), round(average_sim_accuracy*100,2), average_loss, average_ce_loss, average_triple_loss))
+        val_data.set_description("VAL EPOCH {:3d} Average Precision {} Average Recall {} Sim Accuracy {}, Average Loss {:.2e}, CE Loss {:.2e}, T Loss {:.2e}".format(epoch, round(average_precision*100,2), round(average_recall*100,2), round(average_sim_accuracy*100,2), average_loss, average_ce_loss, average_triple_loss))
 
     return average_loss
 

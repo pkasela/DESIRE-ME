@@ -2,7 +2,7 @@ init:
   doc_model: 'facebook/contriever'
   tokenizer: ${model.init.doc_model}
   device: 'cuda'
-  aggregation_mode: 'mean'
+  aggregation_mode: 'identity'
   embedding_size: 768
   save_model: 'contriever'
   query_specialize: True

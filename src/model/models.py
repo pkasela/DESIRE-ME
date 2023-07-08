@@ -37,13 +37,15 @@ class BiEncoderCLS(nn.Module):
         self.hidden_size = self.doc_model.config.hidden_size
         self.tokenizer = tokenizer
         self.device = device
-        assert mode in ['max', 'mean', 'cls'], 'Only cls, max and mean pooling allowed'
+        assert mode in ['max', 'mean', 'cls', 'identity'], 'Only cls, max and mean pooling allowed'
         if mode == 'mean':
             self.pooling = self.mean_pooling
         elif mode == 'max':
             self.pooling = self.max_pooling
         elif mode == 'cls':
             self.pooling = self.cls_pooling
+        elif mode == 'identity':
+            self.pooling = self.identity
         
         self.num_classes = num_classes
         self.init_cls()
@@ -108,7 +110,8 @@ class BiEncoderCLS(nn.Module):
         
         query_embs = torch.stack(query_embs, dim=1)
         
-        query_class = sigmoid(query_class)
+        query_class = sigmoid(query_class.detach())
+        query_class[query_class < .5] = 0
 
         query_embs = F.normalize(einsum('bmd,bm->bd', query_embs, query_class), dim=-1) + query_embedding
                 
@@ -124,12 +127,14 @@ class BiEncoderCLS(nn.Module):
 
     @staticmethod
     def cls_pooling(model_output, attention_mask):
-        
         last_hidden = model_output["last_hidden_state"]
         last_hidden = last_hidden.masked_fill(~attention_mask[..., None].bool(), 0.0)
-        
         return last_hidden[:, 0]
 
+    @staticmethod
+    def identity(model_output, attention_mask):
+        return model_output['pooler_output']
+    
     @staticmethod
     def max_pooling(model_output, attention_mask):
         token_embeddings = model_output[0] #First element of model_output contains all token embeddings
