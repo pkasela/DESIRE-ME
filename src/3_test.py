@@ -112,7 +112,7 @@ def main(cfg: DictConfig):
     else:
         ranx_run = Run(bert_run, 'FullRun')
         models = [ranx_run]
-    evaluation_report = compare(ranx_qrels, models, ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10'])
+    evaluation_report = compare(ranx_qrels, models, ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10', 'precision@1', 'ndcg@3'])
     print(evaluation_report)
     logging.info(f"Results for {cfg.model.init.save_model}_{prefix}.json:\n{evaluation_report}")
 
@@ -142,7 +142,7 @@ def main(cfg: DictConfig):
         else:
             ranx_run = Run(bert_run, 'FullRun')
             models = [ranx_run]
-        evaluation_report = compare(ranx_qrels, models, ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10'])
+        evaluation_report = compare(ranx_qrels, models, ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10', 'precision@1', 'ndcg@3'])
         print(evaluation_report)
         logging.info(f"Results for dev set {cfg.model.init.save_model}_{prefix}.json:\n{evaluation_report}")
 
