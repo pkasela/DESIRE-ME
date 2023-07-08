@@ -43,6 +43,6 @@ class MultipleRankingLoss(nn.Module):
         cls_loss = self.BCELoss(anchors_pred, anchors_classes)
         pw_loss = self.CELoss(pw_similarity, labels)
         
-        return pw_loss, cls_loss, .9 * pw_loss + .1 * cls_loss, (pw_similarity.argmax(dim=1, keepdim=True).squeeze() == labels)
+        return pw_loss, cls_loss, .5 * pw_loss + .5 * cls_loss, (pw_similarity.argmax(dim=1, keepdim=True).squeeze() == labels)
 
 
