@@ -115,7 +115,7 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
                 correct = (predictions) == batch['pos_category'].to(device)
                 recall = (correct * batch['pos_category'].to(device)).sum() / batch['pos_category'].to(device).sum()
                 recalls.append(recall.detach().cpu().item())
-                precision = (correct * predictions).sum() / predictions.sum()
+                precision = predictions.sum() if predictions.sum().int() == 0 else (correct * predictions).sum() / predictions.sum()
                 precisions.append(precision.detach().cpu().item())
                 accuracy.extend([l for c in correct.tolist() for l in c])
                 sim_accuracy.extend(sim_correct.tolist())
