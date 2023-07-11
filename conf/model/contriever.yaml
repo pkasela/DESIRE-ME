@@ -2,7 +2,7 @@ init:
   doc_model: 'facebook/contriever-msmarco'
   tokenizer: ${model.init.doc_model}
   device: 'cuda'
-  aggregation_mode: 'cls'
+  aggregation_mode: 'mean'
   embedding_size: 768
   save_model: 'contriever'
   query_specialize: True
