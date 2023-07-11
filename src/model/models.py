@@ -55,6 +55,7 @@ class BiEncoderCLS(nn.Module):
     def query_encoder(self, sentences):
         encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=128, return_tensors='pt').to(self.device)
         embeddings = self.doc_model(**encoded_input)
+        return self.pooling(embeddings, encoded_input['attention_mask'])
         return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
     
     
@@ -75,6 +76,7 @@ class BiEncoderCLS(nn.Module):
     def doc_encoder(self, sentences):
         encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=128, return_tensors='pt').to(self.device)
         embeddings = self.doc_model(**encoded_input)
+        return self.pooling(embeddings, encoded_input['attention_mask'])
         return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
     
     def cls(self, query_embedding):
@@ -127,8 +129,9 @@ class BiEncoderCLS(nn.Module):
 
     @staticmethod
     def cls_pooling(model_output, attention_mask):
+        return model_output[1]
         last_hidden = model_output["last_hidden_state"]
-        last_hidden = last_hidden.masked_fill(~attention_mask[..., None].bool(), 0.0)
+        # last_hidden = last_hidden.masked_fill(~attention_mask[..., None].bool(), 0.0)
         return last_hidden[:, 0]
 
     @staticmethod
