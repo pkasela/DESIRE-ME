@@ -7,3 +7,4 @@ init:
   save_model: 'sentence-transformers_msmarco-distilbert-base-v3'
   query_specialize: True
   continue_train: False
+  normalize: True

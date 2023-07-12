@@ -7,3 +7,4 @@ init:
   save_model: 'sentece-transformers_all-roberta-large-v1'
   query_specialize: True
   continue_train: False
+  normalize: True

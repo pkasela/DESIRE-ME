@@ -7,3 +7,4 @@ init:
   save_model: 'distilbert-base-uncased_best'
   query_specialize: True
   continue_train: False
+  normalize: True

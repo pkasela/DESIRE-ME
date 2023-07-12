@@ -7,4 +7,4 @@ init:
   save_model: 'sentence-transformers_all-MiniLM-L6-v2'
   query_specialize: True
   continue_train: False
-  
+  normalize: True

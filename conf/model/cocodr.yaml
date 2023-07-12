@@ -1,0 +1,10 @@
+init:
+  doc_model: 'OpenMatch/cocodr-large-msmarco'
+  tokenizer: ${model.init.doc_model}
+  device: 'cuda'
+  aggregation_mode: 'cls'
+  embedding_size: 1024
+  save_model: 'cocodr-large-msmarco'
+  query_specialize: True
+  continue_train: False
+  normalize: False

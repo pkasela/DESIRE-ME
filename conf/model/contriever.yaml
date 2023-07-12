@@ -7,3 +7,4 @@ init:
   save_model: 'contriever'
   query_specialize: True
   continue_train: False
+  normalize: False
