@@ -8,13 +8,13 @@ import pandas as pd
 import torch
 import tqdm
 from omegaconf import DictConfig
-from torch import save
+from torch import save, load
 from torch.optim import AdamW
 from transformers import AutoModel, AutoTokenizer
 
 from dataloader.dataloader import LoadTrainNQData
 from model.loss import MultipleRankingLoss
-from model.models import BiEncoderCLS
+from model.models import SpecialziedBiEncoder
 from model.utils import seed_everything
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def train(train_data, model, optimizer, loss_fn, batch_size, epoch, device):
     optimizer.zero_grad()
     for _, batch in enumerate(train_data):
         with torch.cuda.amp.autocast():
-            output = model.forward_random_neg((batch['question'], batch['pos_text']))
+            output = model((batch['question'], batch['pos_text']))
             triple_loss, ce_loss, loss_val = loss_fn(
                 batch['pos_category'].to(device), output[0],
                 output[1], output[2]
@@ -106,7 +106,7 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
     for _, batch in enumerate(val_data):
         with torch.no_grad():
             with torch.cuda.amp.autocast():
-                output = model.forward_random_neg((batch['question'], batch['pos_text']))
+                output = model.val_forward((batch['question'], batch['pos_text']))
                 triple_loss, ce_loss, loss_val, sim_correct = loss_fn.val_forward(
                     batch['pos_category'].to(device), output[0],
                     output[1], output[2]
@@ -141,6 +141,7 @@ def main(cfg: DictConfig) -> None:
     os.makedirs(cfg.dataset.output_dir, exist_ok=True)
     os.makedirs(cfg.dataset.logs_dir, exist_ok=True)
     os.makedirs(cfg.dataset.model_dir, exist_ok=True)
+    os.makedirs(cfg.dataset.runs_dir, exist_ok=True)
     
     logging_file = "training.log"
     logging.basicConfig(filename=os.path.join(cfg.dataset.logs_dir, logging_file),
@@ -181,12 +182,14 @@ def main(cfg: DictConfig) -> None:
 
     tokenizer = AutoTokenizer.from_pretrained(cfg.model.init.tokenizer)
     doc_model = AutoModel.from_pretrained(cfg.model.init.doc_model)
-    model = BiEncoderCLS(
+    model = SpecialziedBiEncoder(
         doc_model=doc_model,
         tokenizer=tokenizer,
         num_classes=len(category_to_label),
-        device=cfg.model.init.device,
-        mode=cfg.model.init.aggregation_mode
+        normalize=cfg.model.init.normalize,
+        specialized_mode=cfg.model.init.specialized_mode,
+        pooling_mode=cfg.model.init.aggregation_mode,
+        device=cfg.model.init.device
     )
     
     loss_fn = MultipleRankingLoss(device=cfg.model.init.device)
@@ -195,11 +198,11 @@ def main(cfg: DictConfig) -> None:
     max_epoch = cfg.training.max_epoch
     
     
-    if cfg.model.init.continue_train:
+    if cfg.model.continue_train:
         logging.info('Loading previous best model to continue training')
-        model = torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
-        
-        best_val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
+        # model = torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
+        model.load_state_dict(load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt'))
+        best_val_loss = 999 # validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
         logging.info("VAL EPOCH: {}, Average Loss: {:.5e}".format('prev best', best_val_loss))
         
     
@@ -209,9 +212,6 @@ def main(cfg: DictConfig) -> None:
     optimizer = AdamW(model.parameters(), lr=cfg.training.lr)
     
     for epoch in tqdm.tqdm(range(max_epoch)):
-        # if epoch == int(max_epoch/2):
-        #     logging.info(f'Reducing the learning rate from {optimizer.param_groups[0]["lr"]} to {optimizer.param_groups[0]["lr"]/10}')
-        #     optimizer.param_groups[0]['lr'] = optimizer.param_groups[0]['lr']/10
         model.train()
         average_loss = train(train_data, model, optimizer, loss_fn, batch_size, epoch + 1, cfg.model.init.device)
         logging.info("TRAIN EPOCH: {:3d}, Average Loss: {:.5e}".format(epoch + 1, average_loss))
@@ -224,7 +224,8 @@ def main(cfg: DictConfig) -> None:
             logging.info(f'Found new best model on epoch: {epoch + 1}, new best validation loss {val_loss}')
             best_val_loss = val_loss
             logging.info(f'saving model checkpoint at epoch {epoch + 1}')
-            save(model, f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
+            save(model.state_dict(), f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt')
+            # save(model, f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
 
 
 if __name__ == '__main__':

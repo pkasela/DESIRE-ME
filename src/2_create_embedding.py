@@ -9,7 +9,7 @@ from indxr import Indxr
 from omegaconf import DictConfig
 from transformers import AutoModel, AutoTokenizer
 
-from model.models import BiEncoderCLS
+from model.models import SpecialziedBiEncoder
 from model.utils import seed_everything
 
 logger = logging.getLogger(__name__)
@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
     
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: DictConfig):
+    os.makedirs(cfg.dataset.output_dir, exist_ok=True)
+    os.makedirs(cfg.dataset.logs_dir, exist_ok=True)
+    os.makedirs(cfg.dataset.model_dir, exist_ok=True)
+    os.makedirs(cfg.dataset.runs_dir, exist_ok=True)
+    
     logging_file = "create_embedding.log"
     logging.basicConfig(
         filename=os.path.join(cfg.dataset.logs_dir, logging_file),
@@ -34,21 +39,23 @@ def main(cfg: DictConfig):
     with open(cfg.dataset.category_to_label, 'r') as f:
         category_to_label = json.load(f)
 
-    logging.info(f'Loading model from {cfg.model.init.save_model}.whole')
-    if os.path.exists(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole'):
-        model = torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
+    tokenizer = AutoTokenizer.from_pretrained(cfg.model.init.tokenizer)
+    doc_model = AutoModel.from_pretrained(cfg.model.init.doc_model)    
+    model = SpecialziedBiEncoder(
+        doc_model=doc_model,
+        tokenizer=tokenizer,
+        num_classes=len(category_to_label),
+        normalize=cfg.model.init.normalize,
+        specialized_mode=cfg.model.init.specialized_mode,
+        pooling_mode=cfg.model.init.aggregation_mode,
+        device=cfg.model.init.device
+    )
+    logging.info(f'Loading model from {cfg.model.init.save_model}.pt')
+    if os.path.exists(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt'):
+        model.load_state_dict(torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt'))
     else:
         logging.info('New model CLS requested, creating new checkpoint')
-        tokenizer = AutoTokenizer.from_pretrained(cfg.model.init.tokenizer)
-        doc_model = AutoModel.from_pretrained(cfg.model.init.doc_model)
-        model = BiEncoderCLS(
-            doc_model=doc_model,
-            tokenizer=tokenizer,
-            num_classes=len(category_to_label),
-            device=cfg.model.init.device,
-            mode=cfg.model.init.aggregation_mode
-        )
-        torch.save(model, f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
+        torch.save(model.state_dict(), f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt')
 
     
     index = 0
@@ -57,30 +64,23 @@ def main(cfg: DictConfig):
     with open(cfg.testing.bm25_run_path, 'r') as f:
         bm25_run = json.load(f)
     
-    if cfg.testing.rerank:
-        important_docs = []
-        for run in bm25_run:
-            important_docs.extend(list(bm25_run[run]))
-        important_docs = set(important_docs)
     model.eval()
     embedding_matrix = torch.zeros(len(corpus), cfg.model.init.embedding_size).float()
     for doc in tqdm.tqdm(corpus):
-        if not cfg.testing.rerank or doc['_id'] in important_docs:
-            id_to_index[doc['_id']] = index
-            index += 1
-            texts.append(doc['title'] + '. ' + doc['text'])
-            if len(texts) == cfg.training.batch_size:
-                with torch.no_grad():
-                    embedding_matrix[index - len(texts) : index] = model.doc_encoder(texts).cpu()
-                texts = []
+        
+        id_to_index[doc['_id']] = index
+        index += 1
+        texts.append(doc['title'].lower() + ' ' + doc['text'].lower())
+        if len(texts) == cfg.training.batch_size:
+            with torch.no_grad():
+                embedding_matrix[index - len(texts) : index] = model.doc_encoder(texts).cpu()
+            texts = []
     if texts:
         with torch.no_grad():
             embedding_matrix[index - len(texts) : index] = model.doc_encoder(texts).cpu()
             
-    if cfg.testing.rerank:
-        prefix = 'rerank'
-    else:
-        prefix = 'fullrank'
+    
+    prefix = 'fullrank'
     logging.info(f'Embedded {index} documents. Saving embedding matrix in folder {cfg.testing.embedding_dir}.')
     os.makedirs(cfg.testing.embedding_dir, exist_ok=True)
     torch.save(embedding_matrix, f'{cfg.testing.embedding_dir}/{cfg.model.init.save_model}_{prefix}.pt')

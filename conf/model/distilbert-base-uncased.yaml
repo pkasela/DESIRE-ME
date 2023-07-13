@@ -5,6 +5,8 @@ init:
   aggregation_mode: 'mean'
   embedding_size: 768
   save_model: 'distilbert-base-uncased_best'
-  query_specialize: True
-  continue_train: False
+  specialized_mode: 'weight'
   normalize: True
+  
+continue_train: False
+  

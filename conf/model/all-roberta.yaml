@@ -5,6 +5,8 @@ init:
   aggregation_mode: 'mean'
   embedding_size: 1024
   save_model: 'sentece-transformers_all-roberta-large-v1'
-  query_specialize: True
-  continue_train: False
+  specialized_mode: 'weight'
   normalize: True
+
+continue_train: False
+  

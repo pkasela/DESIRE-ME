@@ -7,4 +7,5 @@ val_split: 0.05
 output_dir: output/fever
 model_dir: ${dataset.output_dir}/saved_models
 logs_dir: ${dataset.output_dir}/logs
+runs_dir: ${dataset.output_dir}/runs
   

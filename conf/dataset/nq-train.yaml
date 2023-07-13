@@ -7,4 +7,4 @@ val_split: 0.05
 output_dir: output/nq-train
 model_dir: ${dataset.output_dir}/saved_models
 logs_dir: ${dataset.output_dir}/logs
-  
+runs_dir: ${dataset.output_dir}/runs

@@ -15,36 +15,43 @@ class QuerySpecializer(nn.Module):
         
         self.hidden_size = hidden_size
         self.device = device
-        self.query_embedding_changer_1 = nn.Linear(self.hidden_size, self.hidden_size*2).to(device)
-        self.query_embedding_changer_2 = nn.Linear(self.hidden_size*2, self.hidden_size*4).to(device)
-        self.query_embedding_changer_3 = nn.Linear(self.hidden_size*4, self.hidden_size*2).to(device)
-        self.query_embedding_changer_4 = nn.Linear(self.hidden_size*2, self.hidden_size).to(device)
+        self.query_embedding_changer_1 = nn.Linear(self.hidden_size, self.hidden_size//2).to(device)
+        self.query_embedding_changer_4 = nn.Linear(self.hidden_size//2, self.hidden_size).to(device)
         
     def forward(self, query_embs):
         query_embs = F.relu(self.query_embedding_changer_1(query_embs))
-        query_embs = F.relu(self.query_embedding_changer_2(query_embs))
-        query_embs = F.relu(self.query_embedding_changer_3(query_embs))
         query_embs = self.query_embedding_changer_4(query_embs)
         
         return query_embs
 
 
-class BiEncoderCLS(nn.Module):
-    def __init__(self, doc_model, tokenizer, num_classes, device, mode='mean'):
-        super(BiEncoderCLS, self).__init__()
-        # self.query_model = query_model.to(device)
+class SpecialziedBiEncoder(nn.Module):
+    def __init__(
+        self, 
+        doc_model, 
+        tokenizer, 
+        num_classes, 
+        normalize=False,
+        specialized_mode='weight',
+        pooling_mode='mean', 
+        device='cpu',        
+    ):
+        super(SpecialziedBiEncoder, self).__init__()
         self.doc_model = doc_model.to(device)
         self.hidden_size = self.doc_model.config.hidden_size
         self.tokenizer = tokenizer
         self.device = device
-        assert mode in ['max', 'mean', 'cls', 'identity'], 'Only cls, max and mean pooling allowed'
-        if mode == 'mean':
+        self.normalize = normalize
+        assert specialized_mode in ['weight', 'zeros', 'ones', 'rand'], 'Only weight, zeros, ones and rand specialzed mode allowed'
+        self.specialized_mode = specialized_mode
+        assert pooling_mode in ['max', 'mean', 'cls', 'identity'], 'Only cls, identity, max and mean pooling allowed'
+        if pooling_mode == 'mean':
             self.pooling = self.mean_pooling
-        elif mode == 'max':
+        elif pooling_mode == 'max':
             self.pooling = self.max_pooling
-        elif mode == 'cls':
+        elif pooling_mode == 'cls':
             self.pooling = self.cls_pooling
-        elif mode == 'identity':
+        elif pooling_mode == 'identity':
             self.pooling = self.identity
         
         self.num_classes = num_classes
@@ -70,15 +77,21 @@ class BiEncoderCLS(nn.Module):
         query_class = self.cls(query_embedding)
         query_embedding = self.query_embedder(query_embedding, query_class)
         return query_embedding
-        
+
+    def query_encoder_with_context_val(self, sentences):
+        query_embedding = self.query_encoder(sentences)
+        query_class = self.cls(query_embedding)
+        query_embedding = self.val_query_embedder(query_embedding, query_class)
+        return query_embedding
         
 
     def doc_encoder(self, sentences):
         encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=128, return_tensors='pt').to(self.device)
         embeddings = self.doc_model(**encoded_input)
+        if self.normalize:
+            return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
         return self.pooling(embeddings, encoded_input['attention_mask'])
-        return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
-    
+        
     def cls(self, query_embedding):
         x1 = F.relu(self.cls_1(query_embedding))
         x2 = F.relu(self.cls_2(x1))
@@ -86,40 +99,51 @@ class BiEncoderCLS(nn.Module):
         
         return out
     
-    def forward(self, triplet_texts):
-        query_embedding = self.query_encoder(triplet_texts[0])
+    def forward(self, data):
+        with torch.no_grad():
+            query_embedding = self.query_encoder(data[0])
         query_class = self.cls(query_embedding)
+        
         query_embedding = self.query_embedder(query_embedding, query_class)
         
-        pos_embedding = self.doc_encoder(triplet_texts[1])
+        with torch.no_grad():
+            pos_embedding = self.doc_encoder(data[1])
         
         return query_class, query_embedding, pos_embedding
 
-    def forward_random_neg(self, triplet):
-        with torch.no_grad():
-            query_embedding = self.query_encoder(triplet[0])
-        query_class = self.cls(query_embedding)
         
-        query_embedding = self.query_embedder(query_embedding, query_class)
-        
+    def val_forward(self, data):
         with torch.no_grad():
-            pos_embedding = self.doc_encoder(triplet[1])
+            query_embedding = self.query_encoder(data[0])
+            query_class = self.cls(query_embedding)
+        
+
+            query_embedding = self.query_embedder(query_embedding, query_class)
+        
+            pos_embedding = self.doc_encoder(data[1])
         
         return query_class, query_embedding, pos_embedding
-        
+
+
     def query_embedder(self, query_embedding, query_class):
         query_embs = [self.query_specializer[i](query_embedding) for i in range(self.num_classes)]
         
         query_embs = torch.stack(query_embs, dim=1)
         
-        query_class = sigmoid(query_class.detach())
-        # query_class[query_class < .5] = 0
+        if self.specialized_mode == 'weight':
+            query_class = sigmoid(query_class.detach())
+        if self.specialized_mode == 'zeros':
+            query_class = torch.zeros(query_class.shape).to(self.device)
+        if self.specialized_mode == 'ones':
+            query_class = torch.ones(query_class.shape).to(self.device)
+        if self.specialized_mode == 'rand':
+            query_class = torch.rand(query_class.shape).to(self.device)
+        
+        query_embs = F.normalize(einsum('bmd,bm->bd', query_embs, query_class), dim=-1, eps=1e-6) + query_embedding
 
-        query_embs = F.normalize(einsum('bmd,bm->bd', query_embs, query_class), dim=-1) + query_embedding
-                
-        
-        return F.normalize(query_embs, dim=-1)
-        
+        if self.normalize:
+            return F.normalize(query_embs, dim=-1)
+        return query_embs
     
     @staticmethod
     def mean_pooling(model_output, attention_mask):
@@ -129,7 +153,6 @@ class BiEncoderCLS(nn.Module):
 
     @staticmethod
     def cls_pooling(model_output, attention_mask):
-        return model_output[1]
         last_hidden = model_output["last_hidden_state"]
         # last_hidden = last_hidden.masked_fill(~attention_mask[..., None].bool(), 0.0)
         return last_hidden[:, 0]
