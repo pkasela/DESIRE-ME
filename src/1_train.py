@@ -41,7 +41,6 @@ def train(train_data, model, optimizer, loss_fn, batch_size, epoch, device):
     
     data = torch.utils.data.DataLoader(
         train_data, 
-        # collate_fn=in_batch_negative_collate_fn,
         batch_size=batch_size,
         shuffle=True
     )
@@ -54,9 +53,9 @@ def train(train_data, model, optimizer, loss_fn, batch_size, epoch, device):
                 batch['pos_category'].to(device), output[0],
                 output[1], output[2]
             )
-        
-        # loss_val.backward()
         loss_val.backward()
+        # ce_loss.backward()
+        # triple_loss.backward()
         optimizer.step()
         optimizer.zero_grad()
 
@@ -98,7 +97,6 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
     sim_accuracy = []
     data = torch.utils.data.DataLoader(
         val_data,
-        # collate_fn=in_batch_negative_collate_fn,
         batch_size=batch_size,
         shuffle=True
     )
@@ -191,7 +189,8 @@ def main(cfg: DictConfig) -> None:
         pooling_mode=cfg.model.init.aggregation_mode,
         device=cfg.model.init.device
     )
-    
+    logging.info("Model: {}, lr: {:.2e}, batch_size: {}, epochs: {}".format(cfg.model.init.doc_model, cfg.training.lr, cfg.training.batch_size, cfg.training.max_epoch))
+    logging.info("Normalize: {}, specialized mode: {}, pooling mode: {}".format(cfg.model.init.normalize, cfg.model.init.specialized_mode, cfg.model.init.aggregation_mode))
     loss_fn = MultipleRankingLoss(device=cfg.model.init.device)
 
     batch_size = cfg.training.batch_size
@@ -200,9 +199,8 @@ def main(cfg: DictConfig) -> None:
     
     if cfg.model.continue_train:
         logging.info('Loading previous best model to continue training')
-        # model = torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
         model.load_state_dict(load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt'))
-        best_val_loss = 999 # validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
+        best_val_loss = validate(val_data, model, loss_fn, batch_size, 0, cfg.model.init.device)
         logging.info("VAL EPOCH: {}, Average Loss: {:.5e}".format('prev best', best_val_loss))
         
     
@@ -225,7 +223,6 @@ def main(cfg: DictConfig) -> None:
             best_val_loss = val_loss
             logging.info(f'saving model checkpoint at epoch {epoch + 1}')
             save(model.state_dict(), f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt')
-            # save(model, f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.whole')
 
 
 if __name__ == '__main__':

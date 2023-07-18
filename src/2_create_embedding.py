@@ -36,6 +36,7 @@ def main(cfg: DictConfig):
     seed_everything(cfg.general.seed)
     
     corpus = Indxr(cfg.testing.corpus_path, key_id='_id')
+    corpus = sorted(corpus, key=lambda k: len(k.get("title", "") + k.get("text", "")), reverse=True)
     with open(cfg.dataset.category_to_label, 'r') as f:
         category_to_label = json.load(f)
 

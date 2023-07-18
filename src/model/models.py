@@ -60,11 +60,12 @@ class SpecialziedBiEncoder(nn.Module):
         self.query_specializer = nn.ModuleList([QuerySpecializer(self.hidden_size, self.device) for _ in range(self.num_classes)])    
         
     def query_encoder(self, sentences):
-        encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=128, return_tensors='pt').to(self.device)
+        encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=512, return_tensors='pt').to(self.device)
         embeddings = self.doc_model(**encoded_input)
+        if self.normalize:
+            return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
         return self.pooling(embeddings, encoded_input['attention_mask'])
-        return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
-    
+        
     
     def init_cls(self):
         self.cls_1 = nn.Linear(self.hidden_size, self.hidden_size*2).to(self.device)
@@ -86,7 +87,7 @@ class SpecialziedBiEncoder(nn.Module):
         
 
     def doc_encoder(self, sentences):
-        encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=128, return_tensors='pt').to(self.device)
+        encoded_input = self.tokenizer(sentences, padding=True, truncation=True, max_length=512, return_tensors='pt').to(self.device)
         embeddings = self.doc_model(**encoded_input)
         if self.normalize:
             return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)

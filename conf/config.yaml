@@ -2,7 +2,7 @@ defaults:
   - _self_
   - model: all-minilm
   - training: ${model}
-  - testing: nq
+  - testing: nq-train
   - dataset: nq-train
   - override hydra/hydra_logging: disabled  
   - override hydra/job_logging: disabled 
