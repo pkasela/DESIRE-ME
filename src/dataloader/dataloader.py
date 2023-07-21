@@ -27,7 +27,7 @@ class LoadTrainNQData(torch.utils.data.Dataset):
         pos_id = str(random.choice(list(pos_ids)))
         pos_doc = self.corpus.get(pos_id)
         
-        pos_category = pos_doc.get('category', [])# random.choice(pos_doc.get('category', []))
+        pos_category = pos_doc.get('category', [])
         category_tensor = torch.zeros(len(self.cat_to_label))
         
         for cat in pos_category:
@@ -35,7 +35,7 @@ class LoadTrainNQData(torch.utils.data.Dataset):
         return {
             'question': query_text,
             'pos_text': pos_doc['title'].lower() + ' ' + pos_doc['text'].lower(),
-            'pos_category': category_tensor #self.cat_to_label[pos_category]
+            'pos_category': category_tensor 
         }
         
     def __len__(self):

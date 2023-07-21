@@ -5,7 +5,7 @@ import tqdm
 
 from ranx import Run, Qrels, evaluate
 
-data_folder = 'fever'
+data_folder = 'hotpotqa'
 
 qrel_df = pd.read_csv(f'{data_folder}/qrels/test.tsv', sep='\t')
 qrels = {}

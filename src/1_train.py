@@ -157,8 +157,16 @@ def main(cfg: DictConfig) -> None:
     qrel_df = pd.read_csv(cfg.dataset.qrels_path, sep='\t')
     qrels = {}
 
-    for _, row in qrel_df.iterrows():
-        qrels[str(row['query-id'])] = {str(row['corpus-id']): row['score']}
+    # for _, row in qrel_df.iterrows():
+    #     qrels[str(row['query-id'])] = {str(row['corpus-id']): row['score']}
+        
+    for index, row in qrel_df.iterrows():
+        q_id = str(row['query-id']) 
+        
+        if not q_id in qrels:
+            qrels[q_id] = {}
+        
+        qrels[q_id][str(row['corpus-id'])] = row['score']
 
     data = LoadTrainNQData(
         cfg.dataset.query_path, 
