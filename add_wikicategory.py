@@ -4,29 +4,7 @@ import os
 import unicodedata
 import tqdm
 import subprocess
-
-def get_term_categories(term, term_id):
-    if term in base_categories:
-        return [term]
-    current_categories = category_to_list_dict.get(term_id, [])
-    depth = 0
-    if set(current_categories) & base_categories:
-        return list(set(current_categories) & base_categories)
-    while True:
-        depth += 1
-        try:
-            new_categories = set(sum([category_to_list_dict.get(str(cat_to_id[x]), []) for x in current_categories], []))
-        except:
-            print(current_categories)
-            return
-        if new_categories & base_categories:
-            break
-        current_categories = new_categories
-        if depth > 100:
-            # print('Warn: No Category Found for: ', term, ' ', term_id)
-            return []
-            
-    return list(new_categories & base_categories)
+import click
 
 def text_to_id(text):
     """
@@ -66,11 +44,46 @@ def write_jsonl(file_name, data_jsonl):
         for row in tqdm.tqdm(data_jsonl, desc='Writing jsonl'):
                 json.dump(row, f)
                 f.write('\n')
+
+
+@click.command()
+@click.option(
+    "--wiki_folder",
+    type=str,
+    required=True,
+)
+@click.option(
+    "--dataset",
+    type=str,
+    required=True,
+)
+def main(wiki_folder, dataset):
+    def get_term_categories(term, term_id):
+        if term in base_categories:
+            return [term]
+        current_categories = category_to_list_dict.get(term_id, [])
+        depth = 0
+        if set(current_categories) & base_categories:
+            return list(set(current_categories) & base_categories)
+        while True:
+            depth += 1
+            try:
+                new_categories = set(sum([category_to_list_dict.get(str(cat_to_id[x]), []) for x in current_categories], []))
+            except:
+                print(current_categories)
+                return
+            if new_categories & base_categories:
+                break
+            current_categories = new_categories
+            if depth > 100:
+                # print('Warn: No Category Found for: ', term, ' ', term_id)
+                return []
                 
-if __name__ == "__main__":
-    wiki_folder = "wikipedia_data"
-    corpus_file = 'fever/corpus.jsonl'
-    out_corpus = 'fever/wiki_corpus.jsonl'
+        return list(new_categories & base_categories)
+
+    # wiki_folder = "wikipedia_data"
+    corpus_file = f'{dataset}/corpus.jsonl'
+    out_corpus = f'{dataset}/wiki_corpus.jsonl'
 
     category_df = pd.read_csv(f'{wiki_folder}/category_pandas.csv')
     categorylinks_df = pd.read_csv(f'{wiki_folder}/categorylink_pandas.csv', sep='\t')
@@ -145,3 +158,6 @@ if __name__ == "__main__":
     found = len([x for x in test_corpus_with_category if x['category']])
     total = len(test_corpus_with_category)
     print(f"found categories for {found} over {total} ({found/total})")
+
+if __name__ == "__main__":
+    main()
