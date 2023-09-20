@@ -34,7 +34,7 @@ class LoadTrainNQData(torch.utils.data.Dataset):
             category_tensor[self.cat_to_label[cat]] = 1
         return {
             'question': query_text,
-            'pos_text': pos_doc['title'].lower() + ' ' + pos_doc['text'].lower(),
+            'pos_text': pos_doc.get('title', '').lower() + ' ' + pos_doc['text'].lower(),
             'pos_category': category_tensor 
         }
         

@@ -46,3 +46,39 @@ class MultipleRankingLoss(nn.Module):
         return pw_loss, cls_loss, .5 * pw_loss + .5 * cls_loss, (pw_similarity.argmax(dim=1, keepdim=True).squeeze() == labels)
 
 
+class MultipleRankingLossBiEncoder(nn.Module):
+    """
+    Triplet Margin Loss function.
+    """
+
+    def __init__(self, device):
+        super(MultipleRankingLossBiEncoder, self).__init__()
+        self.CELoss = nn.CrossEntropyLoss()
+        self.BCELoss = nn.BCEWithLogitsLoss()
+        
+        self.device = device
+    def forward(
+        self,
+        anchors,
+        positives
+    ):
+        pw_similarity = torch.mm(anchors, positives.T)
+        labels = torch.tensor([x for x in range(anchors.shape[0])], device=self.device)
+        
+        pw_loss = self.CELoss(pw_similarity, labels)
+        
+        return pw_loss
+    
+    def val_forward(
+        self,
+        anchors,
+        positives
+    ):
+        pw_similarity = torch.mm(anchors, positives.T)
+        labels = torch.tensor([x for x in range(anchors.shape[0])], device=self.device)
+        
+        pw_loss = self.CELoss(pw_similarity, labels)
+        
+        return pw_loss, (pw_similarity.argmax(dim=1, keepdim=True).squeeze() == labels)
+
+

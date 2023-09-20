@@ -131,7 +131,7 @@ def validate(val_data, model, loss_fn, batch_size, epoch, device):
         average_sim_accuracy = np.mean(sim_accuracy)
         val_data.set_description("VAL EPOCH {:3d} Average Precision {} Average Recall {} Sim Accuracy {}, Average Loss {:.2e}, CE Loss {:.2e}, T Loss {:.2e}".format(epoch, round(average_precision*100,2), round(average_recall*100,2), round(average_sim_accuracy*100,2), average_loss, average_ce_loss, average_triple_loss))
 
-    return average_loss
+    return average_loss, average_precision, average_recall
 
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
@@ -223,8 +223,8 @@ def main(cfg: DictConfig) -> None:
         logging.info("TRAIN EPOCH: {:3d}, Average Loss: {:.5e}".format(epoch + 1, average_loss))
         
         model.eval()
-        val_loss = validate(val_data, model, loss_fn, batch_size, epoch + 1, cfg.model.init.device)
-        logging.info("VAL EPOCH: {:3d}, Average Loss: {:.5e}".format(epoch + 1, val_loss))
+        val_loss, average_precision, average_recall = validate(val_data, model, loss_fn, batch_size, epoch + 1, cfg.model.init.device)
+        logging.info("VAL EPOCH: {:3d}, Average Loss: {:.5e}, Average Precision {}, Average Recall {}".format(epoch + 1, val_loss, round(average_precision*100,2), round(average_recall*100,2)))
         
         if val_loss < best_val_loss:
             logging.info(f'Found new best model on epoch: {epoch + 1}, new best validation loss {val_loss}')

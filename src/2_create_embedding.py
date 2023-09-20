@@ -71,7 +71,7 @@ def main(cfg: DictConfig):
         
         id_to_index[doc['_id']] = index
         index += 1
-        texts.append(doc['title'].lower() + ' ' + doc['text'].lower())
+        texts.append(doc.get('title','').lower() + ' ' + doc['text'].lower())
         if len(texts) == cfg.training.batch_size:
             with torch.no_grad():
                 embedding_matrix[index - len(texts) : index] = model.doc_encoder(texts).cpu()
