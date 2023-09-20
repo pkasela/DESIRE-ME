@@ -1,6 +1,7 @@
 import json
 import pandas as pd
 import os
+from beir import util
 
 def iter_corpus_file(filename_corpus):
     with open(filename_corpus, 'rt') as corpusfile:
@@ -25,6 +26,11 @@ def iter_queries_file(filename_queries):
             
 
 data_folder = 'fever'
+dataset = 'fever'
+
+url = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/{}.zip".format(dataset)
+out_dir = os.path.join(pathlib.Path(__file__).parent.absolute(), "")
+data_path = util.download_and_unzip(url, out_dir)
 
 filename_corpus = f'{data_folder}/corpus.jsonl'
 docs = [x for x in iter_corpus_file(filename_corpus)]
