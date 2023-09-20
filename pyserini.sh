@@ -1,7 +1,8 @@
 DATA_FOLDER='fever'
-python create_pyserini_data.py
+python3 create_pyserini_data.py --data_folder $DATA_FOLDER --dataset $DATA_FOLDER
 
-python -m pyserini.index.lucene \
+# No need to run the remaining for datafolder = 'nq-train'
+python3 -m pyserini.index.lucene \
   --collection JsonCollection \
   --input "$DATA_FOLDER"_serini_jsonl \
   --index indexes/"$DATA_FOLDER"_serini_index \
@@ -11,7 +12,7 @@ python -m pyserini.index.lucene \
   --storePositions --storeDocvectors --storeRaw
 
 
-python -m pyserini.search.lucene \
+python3 -m pyserini.search.lucene \
   --index indexes/"$DATA_FOLDER"_serini_index \
   --topics $DATA_FOLDER/queries.tsv \
   --output $DATA_FOLDER/run.txt \
@@ -22,7 +23,7 @@ python -m pyserini.search.lucene \
   --hits 100 \
   --batch 100
 
-python -m pyserini.search.lucene \
+python3 -m pyserini.search.lucene \
   --index indexes/"$DATA_FOLDER"_serini_index \
   --topics $DATA_FOLDER/dev_queries.tsv \
   --output $DATA_FOLDER/dev_run.txt \
@@ -34,4 +35,4 @@ python -m pyserini.search.lucene \
   --batch 100
 
 
-python serini_run_to_json.py
+python3 serini_run_to_json.py --data_folder $DATA_FOLDER
