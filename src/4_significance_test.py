@@ -1,5 +1,6 @@
 import hydra
 import logging
+import os
 
 from ranx import Qrels, Run, compare
 from omegaconf import DictConfig, OmegaConf
@@ -8,15 +9,15 @@ logger = logging.getLogger(__name__)
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: DictConfig):
-    # logging_file = "significance_test.log"
+    logging_file = "significance_test.log"
     logging.basicConfig(
-        # filename=os.path.join(cfg.dataset.logs_dir, logging_file),
-        # filemode='a',
+        filename=os.path.join(cfg.dataset.logs_dir, logging_file),
+        filemode='a',
         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S',
         level=logging.INFO
     )
-
+    
     logging.info('Loading BM25 file')
     bm25_run = Run.from_file(cfg.testing.bm25_run_path)
     bm25_run.name = 'BM25'
@@ -71,10 +72,11 @@ def main(cfg: DictConfig):
         qrels, 
         models, 
         ['map@100', 'mrr@10', 'recall@100', 'ndcg@10', 'precision@1', 'ndcg@3'],
-        max_p=.01/4
+        max_p=.01/9
     )
     
     print(evaluation_report)
+    logging.info(f'\n{evaluation_report}\n')
 
 if __name__ == '__main__':
     main()
