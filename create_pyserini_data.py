@@ -39,9 +39,6 @@ def iter_queries_file(filename_queries):
     required=True,
 )
 def main(data_folder, dataset):
-    data_folder = 'fever'
-    dataset = 'fever'
-
     url = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/{}.zip".format(dataset)
     out_dir = os.path.join(pathlib.Path(__file__).parent.absolute(), "")
     data_path = util.download_and_unzip(url, out_dir)
@@ -68,7 +65,7 @@ def main(data_folder, dataset):
     test_queries_df = queries_df[queries_df['id'].isin(qrel_df['query-id'].astype(str))]
     test_queries_df.to_csv(f'{data_folder}/queries.tsv', sep='\t', header=False, index=None) 
 
-    if data_folder != 'nq':
+    if data_folder != 'nq' or data_folder != 'climate-fever':
         train_qrels = pd.read_csv(f'{data_folder}/qrels/train.tsv', sep='\t')
         dev_qrels = pd.read_csv(f'{data_folder}/qrels/dev.tsv', sep='\t')
         test_qrels = pd.read_csv(f'{data_folder}/qrels/test.tsv', sep='\t')

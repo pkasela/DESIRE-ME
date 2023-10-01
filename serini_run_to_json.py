@@ -45,7 +45,7 @@ def main(data_folder):
 
     print(evaluate(ranx_qrels, ranx_run, ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10']))
 
-    if data_folder != 'nq':
+    if data_folder != 'nq' or data_folder != 'climate-fever':
         qrel_df = pd.read_csv(f'{data_folder}/qrels/dev.tsv', sep='\t')
         qrels = {}
 
