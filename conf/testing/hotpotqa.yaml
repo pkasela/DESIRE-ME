@@ -1,5 +1,5 @@
 data_dir: ../hotpotqa
-corpus_path: ${testing.data_dir}/corpus.jsonl
+corpus_path: ${testing.data_dir}/wiki_corpus.jsonl
 dev_query_path: ${dataset.data_dir}/dev_queries.jsonl
 dev_qrels_path: ${dataset.data_dir}/dev_qrels.json
 dev_bm25_run_path: ${testing.data_dir}/dev_bm25_run.json
