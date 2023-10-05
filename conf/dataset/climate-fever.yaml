@@ -1,5 +1,5 @@
 data_dir: ../climate-fever
-corpus_path: ../climate-fever/wiki_corpus.jsonl
+corpus_path: ${dataset.data_dir}/wiki_corpus.jsonl
 category_to_label: ../fever/category_to_label.json
 val_split: 0.05
 output_dir: output/cliamte-fever
