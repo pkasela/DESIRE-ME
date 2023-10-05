@@ -81,13 +81,22 @@ def main(wiki_folder, dataset):
                 
         return list(new_categories & base_categories)
 
-    # wiki_folder = "wikipedia_data"
     corpus_file = f'{dataset}/corpus.jsonl'
     out_corpus = f'{dataset}/wiki_corpus.jsonl'
 
-    category_df = pd.read_csv(f'{wiki_folder}/category_pandas.csv')
-    categorylinks_df = pd.read_csv(f'{wiki_folder}/categorylink_pandas.csv', sep='\t')
-    page_df = pd.read_csv(f'{wiki_folder}/page_pandas.csv', sep='\t')
+    category_to_label = {
+        "Business": 0, "Communication": 1, "Concepts": 2, "Culture": 3, "Economy": 4, "Education": 5, "Energy": 6, "Engineering": 7, 
+        "Entertainment": 8, "Ethics": 9, "Food_and_drink": 10, "Geography": 11, "Government": 12, "Health": 13, "History": 14, 
+        "Human_behavior": 15, "Humanities": 16, "Information": 17, "Internet": 18, "Knowledge": 19, "Language": 20, "Law": 21, 
+        "Life": 22, "Mass_media": 23, "Mathematics": 24, "Military": 25, "Nature": 26, "People": 27, "Philosophy": 28, "Politics": 29, 
+        "Religion": 30, "Science": 31, "Society": 32, "Sports": 33, "Technology": 34, "Time": 35, "Universe": 36
+    } 
+    with open(f'{dataset}/category_to_label.json', 'w') as f:
+        json.dump(category_to_label, f)
+        
+    category_df = pd.read_csv(f'{wiki_folder}/category.csv')
+    categorylinks_df = pd.read_csv(f'{wiki_folder}/categorylinks.csv')
+    page_df = pd.read_csv(f'{wiki_folder}/page.csv')
     
     category_pages = page_df[page_df['page_namespace']==14]
     cat_to_id = dict(zip(category_pages.page_title, category_pages.page_id))
