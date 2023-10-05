@@ -1,0 +1,15 @@
+beir
+hydra-core 
+indxr
+ipdb 
+numpy
+omegaconf 
+pandas 
+pyterrier
+pyserini
+ranx
+torch
+torchvision 
+torchaudio 
+tqdm 
+transformers
