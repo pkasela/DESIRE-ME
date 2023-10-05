@@ -7,6 +7,7 @@ init:
   save_model: 'contriever'
   specialized_mode: 'weight'
   normalize: False
+  temperature: 0.05
 
 continue_train: False
   

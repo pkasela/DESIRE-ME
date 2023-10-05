@@ -7,5 +7,6 @@ init:
   save_model: 'cocodr-large-msmarco'
   specialized_mode: 'weight'
   normalize: False
+  temperature: 1
 
 continue_train: False

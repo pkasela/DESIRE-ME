@@ -51,10 +51,10 @@ class MultipleRankingLossBiEncoder(nn.Module):
     Triplet Margin Loss function.
     """
 
-    def __init__(self, device):
+    def __init__(self, device, temperature=1):
         super(MultipleRankingLossBiEncoder, self).__init__()
         self.CELoss = nn.CrossEntropyLoss()
-        self.BCELoss = nn.BCEWithLogitsLoss()
+        self.temperature = temperature
         
         self.device = device
     def forward(
@@ -62,7 +62,7 @@ class MultipleRankingLossBiEncoder(nn.Module):
         anchors,
         positives
     ):
-        pw_similarity = torch.mm(anchors, positives.T)
+        pw_similarity = torch.mm(anchors / self.temperature, positives.T)
         labels = torch.tensor([x for x in range(anchors.shape[0])], device=self.device)
         
         pw_loss = self.CELoss(pw_similarity, labels)
@@ -74,7 +74,7 @@ class MultipleRankingLossBiEncoder(nn.Module):
         anchors,
         positives
     ):
-        pw_similarity = torch.mm(anchors, positives.T)
+        pw_similarity = torch.mm(anchors / self.temperature, positives.T)
         labels = torch.tensor([x for x in range(anchors.shape[0])], device=self.device)
         
         pw_loss = self.CELoss(pw_similarity, labels)
