@@ -62,7 +62,6 @@ def main(wiki_folder, dataset):
         if term in base_categories:
             return [term]
         current_categories = category_to_list_dict.get(term_id, [])
-        ipdb.set_trace()
             
         depth = 0
         if set(current_categories) & base_categories:
@@ -154,8 +153,6 @@ def main(wiki_folder, dataset):
     for t in tqdm.tqdm(test_corpus, total=file_len(corpus_file)):
         found_category = title_cat.get(text_to_id(t['title']), [])
         if not found_category:
-            import ipdb
-            ipdb.set_trace()
             found_category = get_term_categories(text_to_id(t['title']), page_to_id_dict.get(text_to_id(t['title']), -1))
         
         if found_category:
