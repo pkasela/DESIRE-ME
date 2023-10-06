@@ -101,9 +101,9 @@ python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.spec
 
 python3 4_significance_test.py dataset=$DATASET testing=$DATASET
 ```
-Just change the DATASET and MODEL to the one you want to replicate, for `climate-fever` do not run the `python3 1_train.py` command as there is not training required. 
-The possible DATASET are: `nq-train`, `hotpotqa`, `fever` and `climate-fever`.
-The possible MODEL are: `cocodr-base-msmarco`, `cocodr-large-msmarco` and `contriever`.
+Just change the DATASET and MODEL to the one you want to replicate, for `climate-fever` do not run the `python3 1_train.py` command as there is not training required. <br>
+The possible DATASET are: `nq-train`, `hotpotqa`, `fever` and `climate-fever`.<br>
+The possible MODEL are: `cocodr-base-msmarco`, `cocodr-large-msmarco` and `contriever`.<br>
 The configurations for training and everthing must be managed fron the `conf` folder, and you can override them using flags.
 
 To replicate the fine-tuning of  the biencoders, use the following commands:
