@@ -1,10 +1,9 @@
 import torch
 from torch import clamp as t_clamp
 from torch import nn
-from torch import tensor
 from torch import sum as t_sum
 from torch import max as t_max
-from torch import softmax, sigmoid
+from torch import sigmoid
 from torch import einsum
 from torch.nn import functional as F
 
@@ -78,12 +77,7 @@ class SpecialziedBiEncoder(nn.Module):
         query_class = self.cls(query_embedding)
         query_embedding = self.query_embedder(query_embedding, query_class)
         return query_embedding
-    
-    def query_encoder_with_context_and_class(self, sentences, query_class):
-        query_embedding = self.query_encoder(sentences)
-        query_class = self.cls(query_embedding)
-        query_embedding, query_class = self.query_embedder_and_class(query_embedding, query_class)
-        return query_embedding, query_class
+
 
     def query_encoder_with_context_val(self, sentences):
         query_embedding = self.query_encoder(sentences)
@@ -99,6 +93,7 @@ class SpecialziedBiEncoder(nn.Module):
             return F.normalize(self.pooling(embeddings, encoded_input['attention_mask']), dim=-1)
         return self.pooling(embeddings, encoded_input['attention_mask'])
         
+
     def cls(self, query_embedding):
         x1 = F.relu(self.cls_1(query_embedding))
         x2 = F.relu(self.cls_2(x1))
@@ -106,6 +101,7 @@ class SpecialziedBiEncoder(nn.Module):
         
         return out
     
+
     def forward(self, data):
         with torch.no_grad():
             query_embedding = self.query_encoder(data[0])
@@ -145,52 +141,20 @@ class SpecialziedBiEncoder(nn.Module):
             query_class = torch.ones(query_class.shape).to(self.device)
         if self.specialized_mode == 'rand':
             query_class = torch.rand(query_class.shape).to(self.device)
-        
-        # query_class = query_class / (query_class.sum(1, keepdims=True).expand_as(query_class) + 1e-6)
-        # query_embs = (einsum('bmd,bm->bd', query_embs, query_class) / (query_class.sum() + 1e-6)) + query_embeddings
+
         query_embs = F.normalize(einsum('bmd,bm->bd', query_embs, query_class), dim=-1, eps=1e-6) + query_embedding
-        # query_embs = einsum('bmd,bm->bd', query_embs, query_class) / self.num_classes + query_embedding 
-        # query_embs = query_embs + query_embedding.unsqueeze(1).expand_as(query_embs)
-        # query_embs = einsum('bmd,bm->bmd', query_embs, query_class)
-        # query_embs = query_embs.mean(1)
-        # query_embs = query_embs.sum(1)
 
         if self.normalize:
             return F.normalize(query_embs, dim=-1)
         return query_embs
     
-    def query_embedder_and_class(self, query_embedding, query_class):
-        query_embs = [self.query_specializer[i](query_embedding) for i in range(self.num_classes)]
-        
-        query_embs = torch.stack(query_embs, dim=1)
-        
-        if self.specialized_mode == 'weight':
-            query_class = sigmoid(query_class.detach())
-        if self.specialized_mode == 'zeros':
-            query_class = torch.zeros(query_class.shape).to(self.device)
-        if self.specialized_mode == 'ones':
-            query_class = torch.ones(query_class.shape).to(self.device)
-        if self.specialized_mode == 'rand':
-            query_class = torch.rand(query_class.shape).to(self.device)
 
-        # query_class = query_class / (query_class.sum(1, keepdims=True).expand_as(query_class) + 1e-6)
-        # query_embs = (einsum('bmd,bm->bd', query_embs, query_class) / (query_class.sum() + 1e-6)) + query_embeddings
-        query_embs = F.normalize(einsum('bmd,bm->bd', query_embs, query_class), dim=-1, eps=1e-6) + query_embedding 
-        # query_embs = query_embs + query_embedding.unsqueeze(1).expand_as(query_embs)
-        # query_embs = einsum('bmd,bm->bmd', query_embs, query_class)
-        # query_embs = query_embs.mean(1)
-        #query_embs = query_embs.sum(1)
-
-
-        if self.normalize:
-            return F.normalize(query_embs, dim=-1)
-        return query_embs, query_class
-    
     @staticmethod
     def mean_pooling(model_output, attention_mask):
         token_embeddings = model_output[0] #First element of model_output contains all token embeddings
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
         return t_sum(token_embeddings * input_mask_expanded, 1) / t_clamp(input_mask_expanded.sum(1), min=1e-9)
+
 
     @staticmethod
     def cls_pooling(model_output, attention_mask):
@@ -198,10 +162,12 @@ class SpecialziedBiEncoder(nn.Module):
         # last_hidden = last_hidden.masked_fill(~attention_mask[..., None].bool(), 0.0)
         return last_hidden[:, 0]
 
+
     @staticmethod
     def identity(model_output, attention_mask):
         return model_output['pooler_output']
     
+
     @staticmethod
     def max_pooling(model_output, attention_mask):
         token_embeddings = model_output[0] #First element of model_output contains all token embeddings
@@ -275,16 +241,19 @@ class BiEncoder(nn.Module):
         input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
         return t_sum(token_embeddings * input_mask_expanded, 1) / t_clamp(input_mask_expanded.sum(1), min=1e-9)
 
+
     @staticmethod
     def cls_pooling(model_output, attention_mask):
         last_hidden = model_output["last_hidden_state"]
         # last_hidden = last_hidden.masked_fill(~attention_mask[..., None].bool(), 0.0)
         return last_hidden[:, 0]
 
+
     @staticmethod
     def identity(model_output, attention_mask):
         return model_output['pooler_output']
     
+
     @staticmethod
     def max_pooling(model_output, attention_mask):
         token_embeddings = model_output[0] #First element of model_output contains all token embeddings

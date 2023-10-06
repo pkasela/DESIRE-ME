@@ -1,4 +1,4 @@
-DATA_FOLDER='climate-fever'
+DATA_FOLDER='hotpotqa' # or 'fever'
 python3 create_pyserini_data.py --data_folder $DATA_FOLDER --dataset $DATA_FOLDER
 
 # No need to run the remaining for datafolder = 'nq-train'
@@ -39,3 +39,6 @@ python3 serini_run_to_json.py --data_folder $DATA_FOLDER
 
 WIKI_FOLDER="wikipedia_data"
 python3 add_wikicategory.py --wiki_folder $WIKI_FOLDER --dataset $DATA_FOLDER
+
+WIKI_FOLDER="wikipedia_data"
+python3  add_wikicategory.py  --wiki_folder  $WIKI_FOLDER  --dataset  $DATA_FOLDER
