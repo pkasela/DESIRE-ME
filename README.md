@@ -1,92 +1,39 @@
-
-  
-
-  
-
 # DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Experts
-
-  
-
-  
-
-  
 
 ## Abstract
 
-  
-
-  
-
 Open-domain question answering requires retrieval systems able to cope with the diverse and varied nature of questions, providing accurate answers across a broad spectrum of query types and topics. To deal with such topic heterogeneity through a unique model, we propose DESIRE-ME, a neural information retrieval model that leverages the Mixture-of-Experts framework to combine multiple specialized neural models. We rely on Wikipedia data to train an effective neural gating mechanism that classifies the incoming query and that weighs correspondingly the predictions of the different domain-specific experts. This allows DESIRE-ME to specialize adaptively in multiple domains. Through extensive experiments on publicly available datasets, we show that our proposal can effectively generalize domain-enhanced neural models. DESIRE-ME excels in handling open-domain questions adaptively, boosting by up to 12% in NDCG@10 and 23% in P@1, the underlying state-of-the-art dense retrieval model.
-
-  
-
-  
-
-  
 
 ## Recreate the dataset
 
-  
-
-  
-
 ### Wikipedia Dataset
-
-  
 
 To recreate the dataset we rely on [Wikimedia database dump of the English Wikipedia on December 20, 2018](https://archive.org/details/enwiki-20181220). To recreate the wikipedia files that we need just run the `wikipedia_data_creation.sh` file containing the following comands:
 
 ```
-
 WIKIPEDIA_FOLDER=wikipedia_data
 
 mkdir $WIKIPEDIA_FOLDER
 
-  
-
 echo "cat_id,cat_title,cat_pages,cat_subcats,cat_files" > $WIKIPEDIA_FOLDER/category.csv
-
 category_link=https://archive.org/download/enwiki-20181220/enwiki-20181220-category.sql.gz
-
 wget -P $WIKIPEDIA_FOLDER $category_link
-
 zcat $WIKIPEDIA_FOLDER/enwiki-20181220-category.sql.gz | python3 mysqldump_to_csv.py >> $WIKIPEDIA_FOLDER/category.csv
 
-  
-
 echo "cl_from,cl_to,cl_sortkey,cl_timestamp,cl_sortkey_prefix,cl_collation,cl_type" > $WIKIPEDIA_FOLDER/categorylinks.csv
-
 categorylinks_link=https://archive.org/download/enwiki-20181220/enwiki-20181220-categorylinks.sql.gz
-
 wget -P $WIKIPEDIA_FOLDER $categorylinks_link
-
 zcat $WIKIPEDIA_FOLDER/enwiki-20181220-categorylinks.sql.gz | python3 mysqldump_to_csv.py >> $WIKIPEDIA_FOLDER/categorylinks.csv
 
-  
-  
-
 echo "page_id,page_namespace,page_title,page_is_redirect,page_is_new,page_random,page_touched,page_links_updated,page_latest,page_len,page_content_model,page_lang" > $WIKIPEDIA_FOLDER/page.csv
-
 page_link=https://archive.org/download/enwiki-20181220/enwiki-20181220-page.sql.gz
-
 wget -P $WIKIPEDIA_FOLDER $page_link
-
 zcat $WIKIPEDIA_FOLDER/enwiki-20181220-page.sql.gz | python3 mysqldump_to_csv.py >> $WIKIPEDIA_FOLDER/page.csv
-
 ```
-
-  
-
 This will create three files: `category.csv`, `categorylinks.csv` and `page.csv` dataframes from the Wikipedia Dump SQL files.
 
-  
-
 ### BEIR Datasts
-
 For this part, the code is slightly different for NQ as it has two separate datasets for training: nq-train and nq, and for Climate-FEVER which does not have the training and validation.
-
-  
 
 <details>
 <summary>NQ-train</summary>
@@ -94,8 +41,6 @@ For this part, the code is slightly different for NQ as it has two separate data
 ```
 # NQ-TRAIN
 DATA_FOLDER='nq-train'
-
-python3  create_pyserini_data.py  --data_folder  $DATA_FOLDER  --dataset  $DATA_FOLDER
 
 WIKI_FOLDER="wikipedia_data"
 python3  add_wikicategory.py  --wiki_folder  $WIKI_FOLDER  --dataset  $DATA_FOLDER
@@ -137,3 +82,38 @@ python3  add_wikicategory.py  --wiki_folder  $WIKI_FOLDER  --dataset  $DATA_FOLD
 ```
 </details>
 
+## Training and Testing 
+
+To train the models so to the `src` folder and run the following: 
+
+```
+DATASET=nq-train
+MODEL=contriever
+
+python3 1_train.py model=$MODEL dataset=$DATASET testing=$DATASET training.max_epoch=60 training.batch_size=512 training.lr=1e-4
+
+python3 2_create_embedding.py model=$MODEL dataset=$DATASET testing=$DATASET training.batch_size=16
+
+python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='zeros' 
+python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='weight' 
+python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='ones' 
+python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='rand' 
+
+python3 4_significance_test.py dataset=$DATASET testing=$DATASET
+```
+Just change the DATASET and MODEL to the one you want to replicate, for `climate-fever` do not run the `python3 1_train.py` command as there is not training required. 
+The possible DATASET are: `nq-train`, `hotpotqa`, `fever` and `climate-fever`.
+The possible MODEL are: `cocodr-base-msmarco`, `cocodr-large-msmarco` and `contriever`.
+The configurations for training and everthing must be managed fron the `conf` folder, and you can override them using flags.
+
+To replicate the fine-tuning of  the biencoders, use the following commands:
+```
+DATASET='fever'
+MODEL='contriever'
+OUTPUT_DIR='output/fever_full'
+
+python3 6_train_biencoder.py model=$MODEL dataset=$DATASET dataset.output_dir=$OUTPUT_DIR testing=$DATASET training.max_epoch=20 training.batch_size=64 training.lr=1e-6
+python3 7_create_embedding.py model=$MODEL dataset=$DATASET testing=$DATASET training.batch_size=16 dataset.output_dir=$OUTPUT_DIR
+python3 8_test_biencoder.py model=$MODEL dataset=$DATASET testing=$DATASET dataset.output_dir=$OUTPUT_DIR
+```
+Again the DATASET, MODEL and the OUTPUT_DIR must be changed according to what you want to replicate.

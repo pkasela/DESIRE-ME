@@ -62,6 +62,8 @@ def main(wiki_folder, dataset):
         if term in base_categories:
             return [term]
         current_categories = category_to_list_dict.get(term_id, [])
+        ipdb.set_trace()
+            
         depth = 0
         if set(current_categories) & base_categories:
             return list(set(current_categories) & base_categories)
@@ -94,26 +96,29 @@ def main(wiki_folder, dataset):
     with open(f'{dataset}/category_to_label.json', 'w') as f:
         json.dump(category_to_label, f)
         
-    category_df = pd.read_csv(f'{wiki_folder}/category.csv')
-    categorylinks_df = pd.read_csv(f'{wiki_folder}/categorylinks.csv')
-    page_df = pd.read_csv(f'{wiki_folder}/page.csv')
+    page_df = pd.read_csv(f'{wiki_folder}/page.csv', encoding='latin-1', usecols=['page_id', 'page_title', 'page_namespace'])
     
     category_pages = page_df[page_df['page_namespace']==14]
     cat_to_id = dict(zip(category_pages.page_title, category_pages.page_id))
-    cat_id = pd.merge(category_df, 
-                    page_df[page_df['page_namespace']==14], 
-                    how='inner', 
-                    left_on='cat_title', 
-                    right_on='page_title'
-    )[['cat_title','page_id']]
     
-    categorylinks_df = categorylinks_df[categorylinks_df['cl_to'].isin(cat_id['cat_title'])]
     if os.path.exists(f'{wiki_folder}/category_to_list.json'):
         print('Category file exists, loading')
         with open(f'{wiki_folder}/category_to_list.json', 'r') as f:
             category_to_list_dict = json.load(f) 
     else:
         print('Creating the dictionary from scratch')
+        category_df = pd.read_csv(f'{wiki_folder}/category.csv', encoding='latin-1', usecols=['cat_id','cat_title','cat_pages','cat_subcats','cat_files'])
+        categorylinks_df = pd.read_csv(f'{wiki_folder}/categorylinks.csv', encoding='latin-1', usecols=['cl_from', 'cl_to', 'cl_type'])
+
+        cat_id = pd.merge(category_df, 
+                        category_pages, #page_df[page_df['page_namespace']==14], 
+                        how='inner', 
+                        left_on='cat_title', 
+                        right_on='page_title'
+        )[['cat_title','page_id']]
+        
+        categorylinks_df = categorylinks_df[categorylinks_df['cl_to'].isin(cat_id['cat_title'])]
+
         category_to_list = categorylinks_df.groupby('cl_from').agg({'cl_to': list})
 
         category_to_list_dict = dict(zip(category_to_list.index, category_to_list.cl_to))
@@ -149,6 +154,8 @@ def main(wiki_folder, dataset):
     for t in tqdm.tqdm(test_corpus, total=file_len(corpus_file)):
         found_category = title_cat.get(text_to_id(t['title']), [])
         if not found_category:
+            import ipdb
+            ipdb.set_trace()
             found_category = get_term_categories(text_to_id(t['title']), page_to_id_dict.get(text_to_id(t['title']), -1))
         
         if found_category:

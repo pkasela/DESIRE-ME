@@ -12,7 +12,7 @@ wget -P $WIKIPEDIA_FOLDER $categorylinks_link
 zcat $WIKIPEDIA_FOLDER/enwiki-20181220-categorylinks.sql.gz | python3 mysqldump_to_csv.py >> $WIKIPEDIA_FOLDER/categorylinks.csv
 
 
-echo "page_id,page_namespace,page_title,page_is_redirect,page_is_new,page_random,page_touched,page_links_updated,page_latest,page_len,page_content_model,page_lang" > $WIKIPEDIA_FOLDER/page.csv
+echo "page_id,page_namespace,page_title,page_restrictions,page_counter,page_is_redirect,page_is_new,page_random,page_touched,page_links_updated,page_latest,page_len,page_content_model,page_lang" > $WIKIPEDIA_FOLDER/page.csv
 page_link=https://archive.org/download/enwiki-20181220/enwiki-20181220-page.sql.gz
 wget -P $WIKIPEDIA_FOLDER $page_link
 zcat $WIKIPEDIA_FOLDER/enwiki-20181220-page.sql.gz | python3 mysqldump_to_csv.py >> $WIKIPEDIA_FOLDER/page.csv

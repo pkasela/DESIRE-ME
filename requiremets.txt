@@ -1,4 +1,5 @@
 beir
+click
 hydra-core 
 indxr
 ipdb 
