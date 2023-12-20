@@ -5,6 +5,8 @@ import unicodedata
 import tqdm
 import subprocess
 import click
+import pathlib
+from beir import util
 
 def text_to_id(text):
     """
@@ -82,6 +84,12 @@ def main(wiki_folder, dataset):
                 
         return list(new_categories & base_categories)
 
+    url = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/{}.zip".format(dataset)
+    out_dir = os.path.join(pathlib.Path(__file__).parent.absolute(), "")
+    if not os.path.exists(os.path.join(out_dir,dataset)):
+        data_path = util.download_and_unzip(url, out_dir)
+        os.remove(os.path.join(pathlib.Path(__file__).parent.absolute(), f"{dataset}.zip"))
+
     corpus_file = f'{dataset}/corpus.jsonl'
     out_corpus = f'{dataset}/wiki_corpus.jsonl'
 
@@ -95,7 +103,13 @@ def main(wiki_folder, dataset):
     with open(f'{dataset}/category_to_label.json', 'w') as f:
         json.dump(category_to_label, f)
         
-    page_df = pd.read_csv(f'{wiki_folder}/page.csv', encoding='latin-1', usecols=['page_id', 'page_title', 'page_namespace'])
+    page_df = pd.read_csv(
+        f'{wiki_folder}/page.csv', 
+        encoding='latin-1',
+        index_col=False,
+        usecols=['page_id', 'page_title', 'page_namespace'],
+        dtype={'page_id': 'int', 'page_title': 'string', 'page_namespace': 'int'}
+    )
     
     category_pages = page_df[page_df['page_namespace']==14]
     cat_to_id = dict(zip(category_pages.page_title, category_pages.page_id))

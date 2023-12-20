@@ -1,6 +1,6 @@
 defaults:
   - _self_
-  - model: all-minilm
+  - model: contriever
   - training: ${model}
   - testing: nq-train
   - dataset: nq-train
