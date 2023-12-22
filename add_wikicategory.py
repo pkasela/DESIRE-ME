@@ -81,7 +81,6 @@ def main(wiki_folder, dataset):
             if depth > 100:
                 # print('Warn: No Category Found for: ', term, ' ', term_id)
                 return []
-                
         return list(new_categories & base_categories)
 
     url = "https://public.ukp.informatik.tu-darmstadt.de/thakur/BEIR/datasets/{}.zip".format(dataset)
@@ -164,7 +163,9 @@ def main(wiki_folder, dataset):
     test_corpus_with_category = []
     title_cat = {}
 
-    for t in tqdm.tqdm(test_corpus, total=file_len(corpus_file)):
+    pbar = tqdm.tqdm(enumerate(test_corpus), total=file_len(corpus_file))
+    found = 0
+    for i, t in pbar:
         found_category = title_cat.get(text_to_id(t['title']), [])
         if not found_category:
             found_category = get_term_categories(text_to_id(t['title']), page_to_id_dict.get(text_to_id(t['title']), -1))
@@ -175,8 +176,10 @@ def main(wiki_folder, dataset):
             if ":" in text_to_id(t['title']):
                 title = text_to_id(t['title']).split(":")[1]
                 found_category = get_term_categories(text_to_id(title), page_to_id_dict.get(text_to_id(title), -1))
-        
         t['category'] = found_category
+        if found_category:
+            found += 1
+            pbar.set_description(f'Found for: {found}/{i}')
         
         test_corpus_with_category.append(t)
     

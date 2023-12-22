@@ -84,7 +84,7 @@ python3  add_wikicategory.py  --wiki_folder  $WIKI_FOLDER  --dataset  $DATA_FOLD
 
 ## Training and Testing 
 
-To train the models so to the `src` folder and run the following: 
+To train the models so go to the src folder (`cd src`) folder and run the following: 
 
 ```
 DATASET=nq-train
@@ -108,12 +108,11 @@ The configurations for training and everthing must be managed fron the `conf` fo
 
 To replicate the fine-tuning of  the biencoders, use the following commands:
 ```
-DATASET='fever'
-MODEL='contriever'
-OUTPUT_DIR='output/fever_full'
+DATASET='nq-train' # hotpotqa, fever
+MODEL='cocodr-large-msmarco' # cocodr-base-msmarco, cocodr-large-msmarco
 
-python3 6_train_biencoder.py model=$MODEL dataset=$DATASET dataset.output_dir=$OUTPUT_DIR testing=$DATASET training.max_epoch=20 training.batch_size=64 training.lr=1e-6
-python3 7_create_embedding.py model=$MODEL dataset=$DATASET testing=$DATASET training.batch_size=16 dataset.output_dir=$OUTPUT_DIR
-python3 8_test_biencoder.py model=$MODEL dataset=$DATASET testing=$DATASET dataset.output_dir=$OUTPUT_DIR
+python3 6_train_biencoder.py model=$MODEL dataset=$DATASET testing=$DATASET dataset.model_dir='output/'$DATASET'/saved_model_biencoder' training.lr=1e-6 training.max_epoch=10 training.batch_size=32
+python3 7_create_embedding.py model=$MODEL dataset=$DATASET testing=$DATASET training.batch_size=16 dataset.model_dir='output/'$DATASET'/saved_model_biencoder' testing.embedding_dir='output/'$DATASET'/embedding_biencoder'
+python3 8_test_biencoder.py model=$MODEL dataset=$DATASET testing=$DATASET dataset.model_dir='output/'$DATASET'/saved_model_biencoder' testing.embedding_dir='output/'$DATASET'/embedding_biencoder'
 ```
-Again the DATASET, MODEL and the OUTPUT_DIR must be changed according to what you want to replicate.
+Again the DATASET and the MODEL must be changed according to what you want to replicate.
