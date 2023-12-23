@@ -1,0 +1,58 @@
+run:
+  name: BM25
+  version: 1.0
+  description: Classic BM25 baseline.
+  code: https://github.com/AmenRa/amdbfpse-baselines
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  team:
+  - name: IKR3
+    url: https://ikr3.disco.unimib.it
+  tags:
+  - Fine-Tuned
+  - Retrieval
+  date:
+    day: 12
+    month: August
+    year: 2022
+    
+benchmark:
+  name: BEIR/NaturalQuestions
+  dataset: NaturalQuestions
+  split: 
+  version: 
+  ir-datasets-id: beir/nq
+
+paper:
+  title: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  - name: Gabriella Pasi
+    orcid: 0000-0002-6080-8170 
+  - name: Raffaele Perego
+    orcid: 0000-0001-7189-4724 
+  - name: Nicola Tonellotto
+    orcid: 0000-0002-7427-1001 
+  date:
+    day:
+    month: March 
+    year: 2024
+  doi: 
+  dblp: 
+
+model:
+  name: BM25
+  description: Classic probabilistic retrieval model.
+  paper: 'The probabilistic relevance framework: BM25 and beyond'
+  doi: 10.1561/1500000019
+  dblp: https://dblp.org/rec/journals/ftir/RobertsonZ09.html?view=bibtex
+  authors:
+  - name: Stephen Robertson
+    orcid: 0000-0003-4115-6215
+  - name: Hugo Zaragoza
+    orcid: ''
+  tags:
+  - Classic
+  - Probabilistic

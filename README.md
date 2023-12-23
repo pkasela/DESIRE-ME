@@ -95,9 +95,8 @@ python3 1_train.py model=$MODEL dataset=$DATASET testing=$DATASET training.max_e
 python3 2_create_embedding.py model=$MODEL dataset=$DATASET testing=$DATASET training.batch_size=16
 
 python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='zeros' 
-python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='weight' 
-python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='ones' 
 python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='rand' 
+python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='weight' 
 
 python3 4_significance_test.py dataset=$DATASET testing=$DATASET
 ```

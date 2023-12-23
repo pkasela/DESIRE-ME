@@ -4,7 +4,7 @@ query_path: ${dataset.data_dir}/train_queries.jsonl
 qrels_path: ${dataset.data_dir}/qrels/train.tsv
 category_to_label: ${dataset.data_dir}/category_to_label.json
 val_split: 0.05
-output_dir: output/hotpot_qa
+output_dir: output/hotpotqa
 model_dir: ${dataset.output_dir}/saved_models
 logs_dir: ${dataset.output_dir}/logs
 runs_dir: ${dataset.output_dir}/runs

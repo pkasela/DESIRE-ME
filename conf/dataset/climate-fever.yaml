@@ -2,7 +2,7 @@ data_dir: ../climate-fever
 corpus_path: ${dataset.data_dir}/wiki_corpus.jsonl
 category_to_label: ../fever/category_to_label.json
 val_split: 0.05
-output_dir: output/cliamte-fever
+output_dir: output/climate-fever
 model_dir: output/fever/saved_models
 logs_dir: ${dataset.output_dir}/logs
 runs_dir: ${dataset.output_dir}/runs

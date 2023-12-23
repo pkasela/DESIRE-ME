@@ -124,32 +124,5 @@ def main(cfg: DictConfig):
     print(evaluation_report)
     logging.info(f"Results for {cfg.model.init.save_model}_{prefix}.json:\n{evaluation_report}")
 
-    if 'nq' not in cfg.testing.data_dir and cfg.testing.rerank:
-        with open(cfg.testing.dev_bm25_run_path, 'r') as f:
-            bm25_run = json.load(f)
-        
-        data = Indxr(cfg.testing.dev_query_path, key_id='_id')
-        bert_run = get_bert_rerank(data, model, doc_embedding, bm25_run, id_to_index)
-            
-            
-        
-        with open(f'{cfg.dataset.runs_dir}/{cfg.model.init.save_model}_{prefix}_dev.json', 'w') as f:
-            json.dump(bert_run, f)
-            
-            
-        ranx_qrels = Qrels.from_file(cfg.testing.dev_qrels_path)
-        
-        if cfg.testing.rerank:
-            ranx_run = Run(bert_run, 'ReRanker')
-            ranx_bm25_run = Run(bm25_run, name='BM25')
-            models = [ranx_bm25_run, ranx_run]
-        else:
-            ranx_run = Run(bert_run, 'FullRun')
-            models = [ranx_run]
-        evaluation_report = compare(ranx_qrels, models, ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10', 'precision@1', 'ndcg@3'])
-        print(evaluation_report)
-        logging.info(f"Results for dev set {cfg.model.init.save_model}_{prefix}.json:\n{evaluation_report}")
-
-
 if __name__ == '__main__':
     main()
