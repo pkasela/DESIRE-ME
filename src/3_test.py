@@ -57,7 +57,7 @@ def main(cfg: DictConfig):
     os.makedirs(cfg.dataset.model_dir, exist_ok=True)
     os.makedirs(cfg.dataset.runs_dir, exist_ok=True)
     
-    logging_file = "testing.log"
+    logging_file = f"{cfg.model.init.doc_model.replace('/','_')}_testing.log"
     logging.basicConfig(
         filename=os.path.join(cfg.dataset.logs_dir, logging_file),
         filemode='a',

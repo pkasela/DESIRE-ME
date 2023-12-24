@@ -13,7 +13,6 @@ do
 
         python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='zeros' 
         python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='weight' 
-        python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='ones' 
         python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='rand' 
 
         python3 4_significance_test.py dataset=$DATASET testing=$DATASET

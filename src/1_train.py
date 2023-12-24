@@ -141,7 +141,7 @@ def main(cfg: DictConfig) -> None:
     os.makedirs(cfg.dataset.model_dir, exist_ok=True)
     os.makedirs(cfg.dataset.runs_dir, exist_ok=True)
     
-    logging_file = "training.log"
+    logging_file = f"{cfg.model.init.doc_model.replace('/','_')}_training.log"
     logging.basicConfig(filename=os.path.join(cfg.dataset.logs_dir, logging_file),
                         filemode='a',
                         format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
