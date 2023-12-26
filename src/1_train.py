@@ -192,6 +192,7 @@ def main(cfg: DictConfig) -> None:
         doc_model=doc_model,
         tokenizer=tokenizer,
         num_classes=len(category_to_label),
+        max_tokens=cfg.model.init.max_tokenizer_length,
         normalize=cfg.model.init.normalize,
         specialized_mode=cfg.model.init.specialized_mode,
         pooling_mode=cfg.model.init.aggregation_mode,

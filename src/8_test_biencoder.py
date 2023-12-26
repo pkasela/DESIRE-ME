@@ -92,7 +92,7 @@ def main(cfg: DictConfig):
     else:
         prefix = 'fullrank'
         
-    prefix += '_' + cfg.model.init.specialized_mode
+    # prefix += '_' + cfg.model.init.specialized_mode
         
     doc_embedding = torch.load(f'{cfg.testing.embedding_dir}/{cfg.model.init.save_model}_fullrank.pt').half().to(cfg.model.init.device)
     

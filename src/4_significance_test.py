@@ -33,6 +33,13 @@ def main(cfg: DictConfig):
         cocodr_base_weight = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_fullrank_weight.json')
         cocodr_base_weight.name = 'COCO-DR-base (weight)'
         cocodr_base_exists = True
+        try:
+            logging.info('Loading COCO-DR-base finetined file')
+            cocodr_base_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_fullrank_biencoder.json')
+            cocodr_base_finetined.name = 'COCO-DR-base (fine tuned)'
+            cocodr_base_finetined_exists = True
+        except FileNotFoundError:
+            cocodr_base_finetined_exists = False
     except FileNotFoundError:
         cocodr_base_exists = False
 
@@ -47,10 +54,17 @@ def main(cfg: DictConfig):
         contriever_weight = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_fullrank_weight.json')
         contriever_weight.name = 'Contriever (weight)'
         contriever_exists = True
+        try:
+            logging.info('Loading Contriever Finetuned file')
+            contriever_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_fullrank_biencoder.json')
+            contriever_finetined.name = 'Contriever (fine tuned)'
+            contriever_finetined_exists = True
+        except FileNotFoundError:
+            contriever_finetined_exists = False
     except FileNotFoundError:
         contriever_exists = False
 
-    try:    
+    try:
         logging.info('Loading COCO-DR-large_zeros file')
         cocodr_large_zeros = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_fullrank_zeros.json')
         cocodr_large_zeros.name = 'COCO-DR-large (zeros)'
@@ -61,44 +75,82 @@ def main(cfg: DictConfig):
         cocodr_large_weight = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_fullrank_weight.json')
         cocodr_large_weight.name = 'COCO-DR-large (weight)'
         cocodr_large_exists = True
+        try:
+            logging.info('Loading COCO-DR-large finetuned file')
+            cocodr_large_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_fullrank_biencoder.json')
+            cocodr_large_finetined.name = 'COCO-DR-large (fine tuned)'
+            cocodr_large_finetined_exists = True
+        except FileNotFoundError:
+            cocodr_large_finetined_exists = False
     except:
         cocodr_large_exists = False
 
     logging.info('Loading qrels file')
     qrels = Qrels.from_file(cfg.testing.qrels_path)
-    
+   
     models = [bm25_run]
     tot_tests = 0
-    if cocodr_base_exists: 
-        models.extend([
-            cocodr_base_zeros,
-            cocodr_base_rand,
-            cocodr_base_weight
-        ])
-        tot_tests += 3
-    if contriever_exists: 
-        models.extend([
-            contriever_zeros,
-            contriever_rand,
-            contriever_weight
-        ])
-        tot_tests += 3
-    if cocodr_large_exists: 
-        models.extend([
-            cocodr_large_zeros,
-            cocodr_large_rand,
-            cocodr_large_weight
-        ])
-        tot_tests += 3
+    if cocodr_base_exists:
+        if cocodr_base_finetined_exists:
+            models.extend([
+                cocodr_base_zeros,
+                cocodr_base_finetined,
+                cocodr_base_rand,
+                cocodr_base_weight
+            ])
+            tot_tests += 3
+        else:
+            models.extend([
+                cocodr_base_zeros,
+                cocodr_base_rand,
+                cocodr_base_weight
+            ])
+            tot_tests += 2
+
+    if contriever_exists:
+        if contriever_finetined_exists:
+            models.extend([
+                contriever_zeros,
+                contriever_finetined,
+                contriever_rand,
+                contriever_weight
+            ])
+            tot_tests += 3
+        else:
+            models.extend([
+                contriever_zeros,
+                contriever_rand,
+                contriever_weight
+            ])
+            tot_tests += 2
+
+    if cocodr_large_exists:
+        if cocodr_large_finetined_exists:
+            models.extend([
+                cocodr_large_zeros,
+                cocodr_large_finetined,
+                cocodr_large_rand,
+                cocodr_large_weight
+            ])
+            tot_tests += 3
+        else:
+            models.extend([
+                cocodr_large_zeros,
+                cocodr_large_rand,
+                cocodr_large_weight
+            ])
+            tot_tests += 2
     
     evaluation_report = compare(
-        qrels, 
-        models, 
+        qrels,
+        models,
         ['map@100', 'mrr@10', 'recall@100', 'ndcg@10', 'precision@1', 'ndcg@3'],
         max_p=.01/tot_tests
     )
     
     print(evaluation_report)
+    with open(os.path.join(cfg.dataset.logs_dir, 'latex_table.tex'), 'w') as f:
+        f.write(evaluation_report.to_latex())
     logging.info(f'\n{evaluation_report}\n')
 
 if __name__ == '__main__':
