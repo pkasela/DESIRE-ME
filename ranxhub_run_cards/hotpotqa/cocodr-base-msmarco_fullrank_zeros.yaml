@@ -1,0 +1,65 @@
+run:
+  name: cocodr-base-msmarco
+  description: Run obtained by running the cocodr-base-msmarco model provided on huggingface.
+  version: 1.0
+  code: https://github.com/pkasela/DESIRE-ME 
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  team:
+  - name: IKR3
+    url: https://ikr3.disco.unimib.it
+  tags:
+  - Zero-Shot
+  - Retrieval
+  date:
+    day:
+    month: March
+    year: 2024
+
+benchmark:
+  name: BEIR/HotpotQA
+  dataset: HotpotQA
+  split: test
+  version:
+  ir-datasets-id: beir/hotpotqa
+
+paper:
+  title: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  - name: Gabriella Pasi
+    orcid: 0000-0002-6080-8170 
+  - name: Raffaele Perego
+    orcid: 0000-0001-7189-4724 
+  - name: Nicola Tonellotto
+    orcid: 0000-0002-7427-1001 
+  date:
+    day:
+    month: March
+    year: 2024
+  doi: 
+  dblp: 
+
+model:
+  name: cocodr-base-msmarco
+  description: "This model has been first pretrained on the BEIR corpus and fine-tuned on MS MARCO dataset following the approach described in the paper COCO-DR: Combating Distribution Shifts in Zero-Shot Dense Retrieval with Contrastive and Distributionally Robust Learning. The associated GitHub repository is available here https://github.com/OpenMatch/COCO-DR. This model is trained with BERT-base as the backbone with 110M hyperparameters. See the paper https://arxiv.org/abs/2210.15212 for details."
+  paper: "COCO-DR: Combating Distribution Shift in Zero-Shot Dense Retrieval with Contrastive and Distributionally Robust Learning"
+  doi: 10.18653/v1/2022.emnlp-main.95 
+  dblp: https://dblp.org/rec/journals/corr/abs-2210-15212.html
+  authors:
+  - name: Yue Yu
+    orcid: ''
+  - name: Chenyan Xiong
+    orcid: ''
+  - name: Si Sun
+    orcid: ''
+  - name: Chao Zhang
+    orcid: ''
+  - name: Arnold Overwijk
+    orcid: '' 
+  tags:
+  - Neural Network
+  - Deep Learning
+  - Contrastive Learning

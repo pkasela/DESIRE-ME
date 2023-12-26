@@ -1,6 +1,6 @@
 run:
   name: contriever-msmarco
-  description: Run obtained by running the contriever model provided by the authors, in our repository by using the option specialized_mode='zeros'
+  description: Run obtained by running the base contriever model provided by huggingface.
   version: 1.0
   code: https://github.com/pkasela/DESIRE-ME 
   authors:
@@ -18,11 +18,11 @@ run:
     year: 2024
 
 benchmark:
-  name: BEIR/CLIMATE-FEVER
-  dataset: CLIMATE-FEVER
-  split: 
+  name: BEIR/FEVER
+  dataset: FEVER
+  split: test
   version:
-  ir-datasets-id: beir/climate-fever
+  ir-datasets-id: beir/fever
 
 paper:
   title: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"

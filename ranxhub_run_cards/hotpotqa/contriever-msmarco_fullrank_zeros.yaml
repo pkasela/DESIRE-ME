@@ -1,6 +1,6 @@
 run:
   name: contriever-msmarco
-  description: Run obtained by running the contriever model provided by the authors, in our repository by using the option specialized_mode='zeros'
+  description: Run obtained by running the base contriever model provided by huggingface.
   version: 1.0
   code: https://github.com/pkasela/DESIRE-ME 
   authors:

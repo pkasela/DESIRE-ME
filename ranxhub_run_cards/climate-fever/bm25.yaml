@@ -18,11 +18,11 @@ run:
     year: 2022
     
 benchmark:
-  name: BEIR/NaturalQuestions
-  dataset: NaturalQuestions
+  name: BEIR/CLIMATE-FEVER
+  dataset: CLIMATE-FEVER
   split: 
-  version: 
-  ir-datasets-id: beir/nq
+  version:
+  ir-datasets-id: beir/climate-fever
 
 paper:
   title: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"

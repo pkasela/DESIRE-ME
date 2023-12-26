@@ -22,7 +22,7 @@ def get_bert_rerank(data, model, doc_embedding, bm25_runs, id_to_index):
     model.eval()
     for d in tqdm.tqdm(data, total=len(data)):
         with torch.no_grad():
-            q_embedding = model.query_encoder_with_context([d['text']])# .half()
+            q_embedding = model.query_encoder_with_context([d['text']])
             
         bm25_docs = list(bm25_runs[d['_id']].keys())
         d_embeddings = doc_embedding[torch.tensor([int(id_to_index[x]) for x in bm25_docs])]
@@ -38,7 +38,7 @@ def get_full_bert_rank(data, model, doc_embedding, id_to_index, k=100):
     model.eval()
     for d in tqdm.tqdm(data, total=len(data)):
         with torch.no_grad():
-            q_embedding = model.query_encoder_with_context([d['text']])# .half()
+            q_embedding = model.query_encoder_with_context([d['text']])
         
         bert_scores = torch.einsum('xy, ly -> x', doc_embedding, q_embedding)
         index_sorted = torch.argsort(bert_scores, descending=True)
