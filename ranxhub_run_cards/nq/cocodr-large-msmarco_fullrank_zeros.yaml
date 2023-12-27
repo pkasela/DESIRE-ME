@@ -18,11 +18,11 @@ run:
     year: 2024
 
 benchmark:
-  name: BEIR/HotpotQA
-  dataset: HotpotQA
-  split: test
+  name: BEIR/NaturalQuestions
+  dataset: NaturalQuestions
+  split: 
   version:
-  ir-datasets-id: beir/hotpotqa
+  ir-datasets-id: beir/nq
 
 paper:
   title: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"

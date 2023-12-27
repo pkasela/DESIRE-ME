@@ -1,0 +1,63 @@
+run:
+  name: desire-me-cocodr-base-msmarco
+  description: Run obtained by running the model trained using DESIRE-ME module with the cocodr-base-msmarco model.
+  version: 1.0
+  code: https://github.com/pkasela/DESIRE-ME 
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  team:
+  - name: IKR3
+    url: https://ikr3.disco.unimib.it
+  tags:
+  - Zero-Shot
+  - Retrieval
+  date:
+    day:
+    month: March
+    year: 2024
+
+benchmark:
+  name: BEIR/HotpotQA
+  dataset: HotpotQA
+  split: test
+  version:
+  ir-datasets-id: beir/hotpotqa
+
+paper:
+  title: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  - name: Gabriella Pasi
+    orcid: 0000-0002-6080-8170 
+  - name: Raffaele Perego
+    orcid: 0000-0001-7189-4724 
+  - name: Nicola Tonellotto
+    orcid: 0000-0002-7427-1001 
+  date:
+    day:
+    month: March
+    year: 2024
+  doi: 
+  dblp: 
+
+model:
+  name: desire-me-cocodr-base-msmarco
+  description: This model is trained using the DESIRE-ME module on the pre-trained cocodr-base-msmarco model available here https://huggingface.co/OpenMatch/cocodr-base-msmarco.
+  paper: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"
+  doi:  
+  dblp: 
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  - name: Gabriella Pasi
+    orcid: 0000-0002-6080-8170 
+  - name: Raffaele Perego
+    orcid: 0000-0001-7189-4724 
+  - name: Nicola Tonellotto
+    orcid: 0000-0002-7427-1001  
+  tags:
+  - Neural Network
+  - Deep Learning
+  - Mixture-Of-Experts

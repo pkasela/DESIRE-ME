@@ -1,6 +1,6 @@
 run:
-  name: cocodr-large-msmarco
-  description: Run obtained by running the cocodr-large-msmarco model provided on huggingface.
+  name: cocodr-base-msmarco
+  description: Run obtained by running the cocodr-base-msmarco model provided on huggingface.
   version: 1.0
   code: https://github.com/pkasela/DESIRE-ME 
   authors:
@@ -18,11 +18,11 @@ run:
     year: 2024
 
 benchmark:
-  name: BEIR/HotpotQA
-  dataset: HotpotQA
-  split: test
+  name: BEIR/NaturalQuestions
+  dataset: NaturalQuestions
+  split: 
   version:
-  ir-datasets-id: beir/hotpotqa
+  ir-datasets-id: beir/nq
 
 paper:
   title: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"
@@ -43,8 +43,8 @@ paper:
   dblp: 
 
 model:
-  name: cocodr-large-msmarco
-  description: "This model has been first pretrained on the BEIR corpus and fine-tuned on MS MARCO dataset following the approach described in the paper COCO-DR: Combating Distribution Shifts in Zero-Shot Dense Retrieval with Contrastive and Distributionally Robust Learning. The associated GitHub repository is available here https://github.com/OpenMatch/COCO-DR. This model is trained with BERT-large as the backbone with 335M hyperparameters. See the paper https://arxiv.org/abs/2210.15212 for details."
+  name: cocodr-base-msmarco
+  description: "This model has been first pretrained on the BEIR corpus and fine-tuned on MS MARCO dataset following the approach described in the paper COCO-DR: Combating Distribution Shifts in Zero-Shot Dense Retrieval with Contrastive and Distributionally Robust Learning. The associated GitHub repository is available here https://github.com/OpenMatch/COCO-DR. This model is trained with BERT-base as the backbone with 110M hyperparameters. See the paper https://arxiv.org/abs/2210.15212 for details."
   paper: "COCO-DR: Combating Distribution Shift in Zero-Shot Dense Retrieval with Contrastive and Distributionally Robust Learning"
   doi: 10.18653/v1/2022.emnlp-main.95 
   dblp: https://dblp.org/rec/journals/corr/abs-2210-15212.html

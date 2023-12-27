@@ -43,7 +43,7 @@ paper:
   dblp: 
 
 model:
-  name: cocodr-base-msmarco
+  name: cocodr-large-msmarco
   description: "This model has been first pretrained on the BEIR corpus and fine-tuned on MS MARCO dataset following the approach described in the paper COCO-DR: Combating Distribution Shifts in Zero-Shot Dense Retrieval with Contrastive and Distributionally Robust Learning. The associated GitHub repository is available here https://github.com/OpenMatch/COCO-DR. This model is trained with BERT-large as the backbone with 335M hyperparameters. See the paper https://arxiv.org/abs/2210.15212 for details."
   paper: "COCO-DR: Combating Distribution Shift in Zero-Shot Dense Retrieval with Contrastive and Distributionally Robust Learning"
   doi: 10.18653/v1/2022.emnlp-main.95 

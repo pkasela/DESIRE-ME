@@ -1,0 +1,69 @@
+run:
+  name: contriever-msmarco
+  description: Run obtained by running the base contriever model provided by huggingface.
+  version: 1.0
+  code: https://github.com/pkasela/DESIRE-ME 
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  team:
+  - name: IKR3
+    url: https://ikr3.disco.unimib.it
+  tags:
+  - Zero-Shot
+  - Retrieval
+  date:
+    day:
+    month: March
+    year: 2024
+
+benchmark:
+  name: BEIR/NaturalQuestions
+  dataset: NaturalQuestions
+  split: 
+  version:
+  ir-datasets-id: beir/nq
+
+paper:
+  title: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"
+  authors:
+  - name: Pranav Kasela
+    orcid: 0000-0003-0972-2424 
+  - name: Gabriella Pasi
+    orcid: 0000-0002-6080-8170 
+  - name: Raffaele Perego
+    orcid: 0000-0001-7189-4724 
+  - name: Nicola Tonellotto
+    orcid: 0000-0002-7427-1001 
+  date:
+    day:
+    month: March
+    year: 2024
+  doi: 
+  dblp: 
+
+model:
+  name: contriever-msmarco
+  description: This model is the finetuned version of the pre-trained contriever model available here https://huggingface.co/facebook/contriever, following the approach described in Towards Unsupervised Dense Information Retrieval with Contrastive Learning. The associated GitHub repository is available here https://github.com/facebookresearch/contriever.
+  paper: Unsupervised Dense Information Retrieval with Contrastive Learning
+  doi: arXiv.2112.09118 
+  dblp: https://dblp.org/rec/journals/tmlr/IzacardCHRBJG22.html
+  authors:
+  - name: Gautier Izacard
+    orcid: ''
+  - name: Mathilde Caron
+    orcid: ''
+  - name: Lucas Hosseini
+    orcid: ''
+  - name: Sebastian Riedel
+    orcid: ''
+  - name: Piotr Bojanowski
+    orcid: '' 
+  - name: Armand Joulin
+    orcid: '' 
+  - name: Edouard Grave
+    orcid: '' 
+  tags:
+  - Neural Network
+  - Deep Learning
+  - Contrastive Learning
