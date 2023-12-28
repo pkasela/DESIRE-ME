@@ -27,7 +27,7 @@ do
     --k1  0.9  \
     --b  0.4  \
     --fields  contents=1  title=1  \
-    --hits  100  \
+    --hits  1000  \
     --batch  100
 
     python3  serini_run_to_json.py  --data_folder  $DATA_FOLDER

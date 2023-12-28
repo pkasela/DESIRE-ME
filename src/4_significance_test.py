@@ -24,18 +24,18 @@ def main(cfg: DictConfig):
 
     try:
         logging.info('Loading COCO-DR-base_zeros file')
-        cocodr_base_zeros = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_fullrank_zeros.json')
-        cocodr_base_zeros.name = 'COCO-DR-base (zeros)'
+        cocodr_base_zeros = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_zeros.lz4')
+        cocodr_base_zeros.name = 'COCO-DR-base (Base)'
         logging.info('Loading COCO-DR-base_rand file')
-        cocodr_base_rand = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_fullrank_rand.json')
+        cocodr_base_rand = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_rand.lz4')
         cocodr_base_rand.name = 'COCO-DR-base (rand)'
         logging.info('Loading COCO-DR-base_weight file')
-        cocodr_base_weight = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_fullrank_weight.json')
-        cocodr_base_weight.name = 'COCO-DR-base (weight)'
+        cocodr_base_weight = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_desireme.lz4')
+        cocodr_base_weight.name = 'COCO-DR-base (DESIRE-ME)'
         cocodr_base_exists = True
         try:
             logging.info('Loading COCO-DR-base finetined file')
-            cocodr_base_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_fullrank_biencoder.json')
+            cocodr_base_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-base-msmarco_biencoder.lz4')
             cocodr_base_finetined.name = 'COCO-DR-base (fine tuned)'
             cocodr_base_finetined_exists = True
         except FileNotFoundError:
@@ -45,18 +45,18 @@ def main(cfg: DictConfig):
 
     try:
         logging.info('Loading contriever_zeros file')
-        contriever_zeros = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_fullrank_zeros.json')
-        contriever_zeros.name = 'Contriever (zeros)'
+        contriever_zeros = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_zeros.lz4')
+        contriever_zeros.name = 'Contriever (Base)'
         logging.info('Loading contriever_rand file')
-        contriever_rand = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_fullrank_rand.json')
+        contriever_rand = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_rand.lz4')
         contriever_rand.name = 'Contriever (rand)'
         logging.info('Loading contriever_weight file')
-        contriever_weight = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_fullrank_weight.json')
-        contriever_weight.name = 'Contriever (weight)'
+        contriever_weight = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_desireme.lz4')
+        contriever_weight.name = 'Contriever (DESIRE-ME)'
         contriever_exists = True
         try:
             logging.info('Loading Contriever Finetuned file')
-            contriever_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_fullrank_biencoder.json')
+            contriever_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/contriever_biencoder.lz4')
             contriever_finetined.name = 'Contriever (fine tuned)'
             contriever_finetined_exists = True
         except FileNotFoundError:
@@ -66,18 +66,18 @@ def main(cfg: DictConfig):
 
     try:
         logging.info('Loading COCO-DR-large_zeros file')
-        cocodr_large_zeros = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_fullrank_zeros.json')
-        cocodr_large_zeros.name = 'COCO-DR-large (zeros)'
+        cocodr_large_zeros = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_zeros.lz4')
+        cocodr_large_zeros.name = 'COCO-DR-large (Base)'
         logging.info('Loading COCO-DR-large_rand file')
-        cocodr_large_rand = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_fullrank_rand.json')
+        cocodr_large_rand = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_rand.lz4')
         cocodr_large_rand.name = 'COCO-DR-large (rand)'
         logging.info('Loading COCO-DR-large_weight file')
-        cocodr_large_weight = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_fullrank_weight.json')
-        cocodr_large_weight.name = 'COCO-DR-large (weight)'
+        cocodr_large_weight = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_desireme.lz4')
+        cocodr_large_weight.name = 'COCO-DR-large (DESIRE-ME)'
         cocodr_large_exists = True
         try:
             logging.info('Loading COCO-DR-large finetuned file')
-            cocodr_large_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_fullrank_biencoder.json')
+            cocodr_large_finetined = Run.from_file(f'{cfg.dataset.runs_dir}/cocodr-large-msmarco_biencoder.lz4')
             cocodr_large_finetined.name = 'COCO-DR-large (fine tuned)'
             cocodr_large_finetined_exists = True
         except FileNotFoundError:

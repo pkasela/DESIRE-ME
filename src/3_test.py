@@ -32,7 +32,7 @@ def get_bert_rerank(data, model, doc_embedding, bm25_runs, id_to_index):
     return bert_run
 
 
-def get_full_bert_rank(data, model, doc_embedding, id_to_index, k=100):
+def get_full_bert_rank(data, model, doc_embedding, id_to_index, k=1000):
     bert_run = {}
     index_to_id = {ind: _id for _id, ind in id_to_index.items()}
     model.eval()
@@ -85,13 +85,14 @@ def main(cfg: DictConfig):
     
     model.load_state_dict(torch.load(f'{cfg.dataset.model_dir}/{cfg.model.init.save_model}.pt'))
     
-    if cfg.testing.rerank:
-        prefix = 'rerank'
-    else:
-        prefix = 'fullrank'
+    # if cfg.testing.rerank:
+    #     prefix = 'rerank'
+    # else:
+    #     prefix = 'fullrank'
         
-    prefix += '_' + cfg.model.init.specialized_mode
-        
+    # prefix += '_' + cfg.model.init.specialized_mode
+    prefix = cfg.model.init.specialized_mode
+
     doc_embedding = torch.load(f'{cfg.testing.embedding_dir}/{cfg.model.init.save_model}_fullrank.pt').to(cfg.model.init.device)
     
     with open(f'{cfg.testing.embedding_dir}/id_to_index_{cfg.model.init.save_model}_fullrank.json', 'r') as f:
@@ -104,12 +105,13 @@ def main(cfg: DictConfig):
     if cfg.testing.rerank:
         bert_run = get_bert_rerank(data, model, doc_embedding, bm25_run, id_to_index)
     else:
-        bert_run = get_full_bert_rank(data, model, doc_embedding, id_to_index, 100)
+        bert_run = get_full_bert_rank(data, model, doc_embedding, id_to_index, 1000)
         
     
-    with open(f'{cfg.dataset.runs_dir}/{cfg.model.init.save_model}_{prefix}.json', 'w') as f:
-        json.dump(bert_run, f)
-        
+    # with open(f'{cfg.dataset.runs_dir}/{cfg.model.init.save_model}_{prefix}.json', 'w') as f:
+    #     json.dump(bert_run, f)
+    
+
         
     ranx_qrels = Qrels.from_file(cfg.testing.qrels_path)
     
@@ -120,7 +122,14 @@ def main(cfg: DictConfig):
     else:
         ranx_run = Run(bert_run, 'FullRun')
         models = [ranx_run]
-    evaluation_report = compare(ranx_qrels, models, ['map@100', 'mrr@10', 'recall@100', 'ndcg@10', 'precision@1', 'ndcg@3'])
+    evaluation_report = compare(
+        ranx_qrels,
+        models,
+        ['map@100', 'mrr@10', 'recall@100', 'ndcg@10', 'precision@1', 'ndcg@3']
+    )
+
+    ranx_run.save(f'{cfg.dataset.runs_dir}/{cfg.model.init.save_model}_{prefix}.lz4')
+    
     print(evaluation_report)
     logging.info(f"Results for {cfg.model.init.save_model}_{prefix}.json:\n{evaluation_report}")
 

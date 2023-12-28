@@ -43,6 +43,9 @@ def main(data_folder):
     ranx_qrels = Qrels(qrels)
     ranx_run = Run(run)
 
+    ranx_run.name = 'BM25'
+    ranx_run.save(f'{data_folder}/bm25_run.lz4')
+
     print(evaluate(ranx_qrels, ranx_run, ['map@100', 'mrr@10', 'recall@100', 'precision@5', 'ndcg@10'], make_comparable=True))
     """
     if data_folder != 'nq' and data_folder != 'climate-fever':

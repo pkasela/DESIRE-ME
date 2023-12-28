@@ -32,7 +32,7 @@ class SpecialziedBiEncoder(nn.Module):
         num_classes,
         max_tokens=512,
         normalize=False,
-        specialized_mode='weight',
+        specialized_mode='desireme',
         pooling_mode='mean',
         device='cpu',
     ):
@@ -43,7 +43,7 @@ class SpecialziedBiEncoder(nn.Module):
         self.device = device
         self.normalize = normalize
         self.max_tokens = max_tokens
-        assert specialized_mode in ['weight', 'zeros', 'ones', 'rand'], 'Only weight, zeros, ones and rand specialzed mode allowed'
+        assert specialized_mode in ['desireme', 'zeros', 'ones', 'rand'], 'Only desireme, zeros, ones and rand specialzed mode allowed'
         self.specialized_mode = specialized_mode
         assert pooling_mode in ['max', 'mean', 'cls', 'identity'], 'Only cls, identity, max and mean pooling allowed'
         if pooling_mode == 'mean':
@@ -135,7 +135,7 @@ class SpecialziedBiEncoder(nn.Module):
         
         query_embs = torch.stack(query_embs, dim=1)
         
-        if self.specialized_mode == 'weight':
+        if self.specialized_mode == 'desireme':
             query_class = sigmoid(query_class.detach())
         if self.specialized_mode == 'zeros':
             query_class = torch.zeros(query_class.shape).to(self.device)
