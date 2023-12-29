@@ -31,6 +31,7 @@ wget -P $WIKIPEDIA_FOLDER $page_link
 zcat $WIKIPEDIA_FOLDER/enwiki-20181220-page.sql.gz | python3 mysqldump_to_csv.py >> $WIKIPEDIA_FOLDER/page.csv
 ```
 This will create three files: `category.csv`, `categorylinks.csv` and `page.csv` dataframes from the Wikipedia Dump SQL files.
+Alternatively, simply run: `1_pipeline_wikipedia_data_creation.sh` 
 
 ### BEIR Datasts
 For this part, the code is slightly different for NQ as it has two separate datasets for training: nq-train and nq, and for Climate-FEVER which does not have the training and validation.
@@ -82,6 +83,8 @@ python3  add_wikicategory.py  --wiki_folder  $WIKI_FOLDER  --dataset  $DATA_FOLD
 ```
 </details>
 
+For the complete pipeline run: `2_pipeline_pyserini.sh`
+
 ## Training and Testing 
 
 To train the models so go to the src folder (`cd src`) folder and run the following: 
@@ -96,7 +99,7 @@ python3 2_create_embedding.py model=$MODEL dataset=$DATASET testing=$DATASET tra
 
 python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='zeros' 
 python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='rand' 
-python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='weight' 
+python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='desireme' 
 
 python3 4_significance_test.py dataset=$DATASET testing=$DATASET
 ```
@@ -115,3 +118,5 @@ python3 7_create_embedding.py model=$MODEL dataset=$DATASET testing=$DATASET tra
 python3 8_test_biencoder.py model=$MODEL dataset=$DATASET testing=$DATASET dataset.model_dir='output/'$DATASET'/saved_model_biencoder' testing.embedding_dir='output/'$DATASET'/embedding_biencoder'
 ```
 Again the DATASET and the MODEL must be changed according to what you want to replicate.
+
+For the complete pipeline for all models and datasets run: `2_pipeline_models.sh`.
