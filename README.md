@@ -119,4 +119,4 @@ python3 8_test_biencoder.py model=$MODEL dataset=$DATASET testing=$DATASET datas
 ```
 Again the DATASET and the MODEL must be changed according to what you want to replicate.
 
-For the complete pipeline for all models and datasets run: `2_pipeline_models.sh`.
+For the complete pipeline for all models and datasets run: `3_pipeline_models.sh`.
