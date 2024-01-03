@@ -5,7 +5,7 @@ init:
   aggregation_mode: 'cls'
   embedding_size: 768
   save_model: 'cocodr-base-msmarco'
-  specialized_mode: 'weight'
+  specialized_mode: 'desireme'
   max_tokenizer_length: 256
   normalize: False
   temperature: 1
