@@ -1,3 +1,4 @@
+name: climate-fever
 data_dir: ../climate-fever
 fever_data_dir: ../fever
 corpus_path: ${testing.data_dir}/wiki_corpus.jsonl

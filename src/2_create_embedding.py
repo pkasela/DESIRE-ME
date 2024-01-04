@@ -46,6 +46,7 @@ def main(cfg: DictConfig):
         doc_model=doc_model,
         tokenizer=tokenizer,
         num_classes=len(category_to_label),
+        max_tokens=cfg.model.init.max_tokenizer_length,
         normalize=cfg.model.init.normalize,
         specialized_mode=cfg.model.init.specialized_mode,
         pooling_mode=cfg.model.init.aggregation_mode,
@@ -62,8 +63,6 @@ def main(cfg: DictConfig):
     index = 0
     texts = []
     id_to_index = {}
-    with open(cfg.testing.bm25_run_path, 'r') as f:
-        bm25_run = json.load(f)
     
     model.eval()
     embedding_matrix = torch.zeros(len(corpus), cfg.model.init.embedding_size).float()

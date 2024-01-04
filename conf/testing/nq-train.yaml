@@ -1,3 +1,4 @@
+name: nq
 data_dir: ../nq
 corpus_path: ${testing.data_dir}/wiki_corpus.jsonl
 query_path: ${testing.data_dir}/queries.jsonl

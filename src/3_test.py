@@ -98,40 +98,24 @@ def main(cfg: DictConfig):
     with open(f'{cfg.testing.embedding_dir}/id_to_index_{cfg.model.init.save_model}_fullrank.json', 'r') as f:
         id_to_index = json.load(f)
     
-    with open(cfg.testing.bm25_run_path, 'r') as f:
-        bm25_run = json.load(f)
-    
     data = Indxr(cfg.testing.query_path, key_id='_id')
-    if cfg.testing.rerank:
-        bert_run = get_bert_rerank(data, model, doc_embedding, bm25_run, id_to_index)
-    else:
-        bert_run = get_full_bert_rank(data, model, doc_embedding, id_to_index, 1000)
-        
-    
-    # with open(f'{cfg.dataset.runs_dir}/{cfg.model.init.save_model}_{prefix}.json', 'w') as f:
-    #     json.dump(bert_run, f)
-    
-
+    bert_run = get_full_bert_rank(data, model, doc_embedding, id_to_index, 1000)
         
     ranx_qrels = Qrels.from_file(cfg.testing.qrels_path)
+
+    ranx_run = Run(bert_run, 'FullRun')
+    ranx_run.save(f'{cfg.dataset.runs_dir}/{cfg.model.init.save_model}_{prefix}.lz4')
     
-    if cfg.testing.rerank:
-        ranx_run = Run(bert_run, 'ReRanker')
-        ranx_bm25_run = Run(bm25_run, name='BM25')
-        models = [ranx_bm25_run, ranx_run]
-    else:
-        ranx_run = Run(bert_run, 'FullRun')
-        models = [ranx_run]
+    models = [ranx_run]
     evaluation_report = compare(
         ranx_qrels,
         models,
         ['map@100', 'mrr@10', 'recall@100', 'ndcg@10', 'precision@1', 'ndcg@3']
     )
 
-    ranx_run.save(f'{cfg.dataset.runs_dir}/{cfg.model.init.save_model}_{prefix}.lz4')
-    
     print(evaluation_report)
     logging.info(f"Results for {cfg.model.init.save_model}_{prefix}.json:\n{evaluation_report}")
-
+    
+    
 if __name__ == '__main__':
     main()

@@ -97,11 +97,11 @@ python3 1_train.py model=$MODEL dataset=$DATASET testing=$DATASET training.max_e
 
 python3 2_create_embedding.py model=$MODEL dataset=$DATASET testing=$DATASET training.batch_size=16
 
-python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='zeros' 
-python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='rand' 
 python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='desireme' 
+python3 3_test.py model=$MODEL dataset=$DATASET testing=$DATASET model.init.specialized_mode='rand'
+python3 4_beir_eval.py model=$MODEL dataset=$DATASET testing=$DATASET # zero shot model
 
-python3 4_significance_test.py dataset=$DATASET testing=$DATASET
+python3 5_significance_test.py dataset=$DATASET testing=$DATASET
 ```
 Just change the DATASET and MODEL to the one you want to replicate, for `climate-fever` do not run the `python3 1_train.py` command as there is not training required. <br>
 The possible DATASET are: `nq-train`, `hotpotqa`, `fever` and `climate-fever`.<br>

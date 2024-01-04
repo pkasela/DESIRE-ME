@@ -1,3 +1,4 @@
+name: fever
 data_dir: ../fever
 corpus_path: ${testing.data_dir}/wiki_corpus.jsonl
 dev_query_path: ${dataset.data_dir}/dev_queries.jsonl
