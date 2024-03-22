@@ -39,14 +39,14 @@ paper:
     day:
     month: March
     year: 2024
-  doi: 
+  doi: 10.1007/978-3-031-56060-6_8
   dblp: 
 
 model:
   name: desire-me-contriever-msmarco
   description: This model is trained using the DESIRE-ME module on the pre-trained contriever model available here https://huggingface.co/facebook/contriever.
   paper: "DESIRE-ME: Domain-Enhanced Supervised Information REtrieval using Mixture-of-Expert"
-  doi:  
+  doi:  10.1007/978-3-031-56060-6_8
   dblp: 
   authors:
   - name: Pranav Kasela
